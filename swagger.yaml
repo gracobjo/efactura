@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: eFactura API
+  version: 1.2.0
+  description: API REST para facturación electrónica con búsqueda avanzada.
+servers:
+  - url: http://localhost:5000
+paths:
+  /factura:
+    post:
+      summary: Crear una nueva factura y devolver el PDF generado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cliente:
+                  type: object
+                  properties:
+                    nombre:
+                      type: string
+                    direccion:
+                      type: string
+                    identificacion:
+                      type: string
+                  required: [nombre, direccion, identificacion]
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      descripcion:
+                        type: string
+                      cantidad:
+                        type: integer
+                      precio_unitario:
+                        type: number
+                    required: [descripcion, cantidad, precio_unitario]
+              required: [cliente, items]
+      responses:
+        '200':
+          description: PDF generado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Datos inválidos
+
+  /facturas:
+    get:
+      summary: Buscar y listar facturas con filtros avanzados
+      parameters:
+        - in: query
+          name: cliente_nombre
+          schema:
+            type: string
+          description: Nombre del cliente (búsqueda parcial)
+        - in: query
+          name: cliente_identificacion
+          schema:
+            type: string
+          description: Identificación del cliente
+        - in: query
+          name: fecha_desde
+          schema:
+            type: string
+            format: date
+          description: Fecha de inicio (YYYY-MM-DD)
+        - in: query
+          name: fecha_hasta
+          schema:
+            type: string
+            format: date
+          description: Fecha de fin (YYYY-MM-DD)
+        - in: query
+          name: total_min
+          schema:
+            type: number
+          description: Total mínimo de la factura
+        - in: query
+          name: total_max
+          schema:
+            type: number
+          description: Total máximo de la factura
+      responses:
+        '200':
+          description: Lista de facturas filtradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    numero:
+                      type: string
+                    fecha:
+                      type: string
+                    cliente:
+                      type: object
+                      properties:
+                        nombre:
+                          type: string
+                        identificacion:
+                          type: string
+                    total:
+                      type: number
+
+  /factura/{id_factura}/pdf:
+    get:
+      summary: Descargar el PDF de una factura por su ID
+      parameters:
+        - in: path
+          name: id_factura
+          schema:
+            type: integer
+          required: true
+          description: ID de la factura
+      responses:
+        '200':
+          description: PDF de la factura
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Factura no encontrada
+
+  /factura/{id_factura}:
+    delete:
+      summary: Eliminar una factura por su ID
+      parameters:
+        - in: path
+          name: id_factura
+          schema:
+            type: integer
+          required: true
+          description: ID de la factura
+      responses:
+        '200':
+          description: Factura eliminada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Factura no encontrada
+
+  /verificar/{id_factura}:
+    get:
+      summary: Verificar una factura por su ID
+      parameters:
+        - in: path
+          name: id_factura
+          schema:
+            type: integer
+          required: true
+          description: ID de la factura
+      responses:
+        '200':
+          description: Datos básicos de la factura
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  numero:
+                    type: string
+                  fecha:
+                    type: string
+                  cliente:
+                    type: object
+                    properties:
+                      nombre:
+                        type: string
+                      identificacion:
+                        type: string
+                  total:
+                    type: number
+        '404':
+          description: Factura no encontrada 

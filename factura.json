@@ -1,0 +1,11 @@
+{
+  "cliente": {
+    "nombre": "Carlos Ruiz",
+    "direccion": "Calle Nueva 456",
+    "identificacion": "11223344C"
+  },
+  "items": [
+    {"descripcion": "Producto Z", "cantidad": 2, "precio_unitario": 150.0},
+    {"descripcion": "Servicio Y", "cantidad": 1, "precio_unitario": 300.0}
+  ]
+} 
