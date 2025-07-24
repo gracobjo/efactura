@@ -43,4 +43,111 @@ def test_busqueda_avanzada(client):
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]["cliente"]["nombre"] == "Cliente 1" 
+    assert data[0]["cliente"]["nombre"] == "Cliente 1"
+
+def test_crear_factura_datos_faltantes(client):
+    # Test sin datos de cliente
+    factura_data = {
+        "items": [
+            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 10.0}
+        ]
+    }
+    response = client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
+    assert response.status_code == 400
+    assert "Datos de cliente e items requeridos" in response.get_json()["message"]
+
+    # Test sin items
+    factura_data = {
+        "cliente": {
+            "nombre": "Test",
+            "direccion": "Test",
+            "identificacion": "TEST"
+        }
+    }
+    response = client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
+    assert response.status_code == 400
+    assert "Datos de cliente e items requeridos" in response.get_json()["message"]
+
+def test_verificar_factura_no_existe(client):
+    response = client.get("/verificar/999")
+    assert response.status_code == 404
+    assert "Factura no encontrada" in response.get_json()["mensaje"]
+
+def test_busqueda_con_filtros_avanzados(client):
+    # Crear factura para testing
+    factura_data = {
+        "cliente": {
+            "nombre": "Cliente Filtro",
+            "direccion": "Dirección",
+            "identificacion": "FILTRO123"
+        },
+        "items": [
+            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 100.0}
+        ]
+    }
+    client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
+
+    # Test filtro por identificación
+    response = client.get("/facturas?cliente_identificacion=FILTRO123")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]["cliente"]["identificacion"] == "FILTRO123"
+
+    # Test filtro por monto mínimo
+    response = client.get("/facturas?total_min=50")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) >= 1
+
+    # Test filtro por monto máximo
+    response = client.get("/facturas?total_max=200")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) >= 1
+
+def test_descargar_pdf_factura(client):
+    # Crear factura primero
+    factura_data = {
+        "cliente": {
+            "nombre": "Test PDF",
+            "direccion": "Test",
+            "identificacion": "PDF123"
+        },
+        "items": [
+            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 10.0}
+        ]
+    }
+    client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
+
+    # Descargar PDF
+    response = client.get("/factura/1/pdf")
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/pdf"
+
+def test_descargar_pdf_factura_no_existe(client):
+    response = client.get("/factura/999/pdf")
+    assert response.status_code == 404
+
+def test_eliminar_factura(client):
+    # Crear factura primero
+    factura_data = {
+        "cliente": {
+            "nombre": "Test Delete",
+            "direccion": "Test",
+            "identificacion": "DELETE123"
+        },
+        "items": [
+            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 10.0}
+        ]
+    }
+    client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
+
+    # Eliminar factura
+    response = client.delete("/factura/1")
+    assert response.status_code == 200
+    assert "eliminada correctamente" in response.get_json()["message"]
+
+def test_eliminar_factura_no_existe(client):
+    response = client.delete("/factura/999")
+    assert response.status_code == 404 

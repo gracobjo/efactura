@@ -124,7 +124,7 @@ class FacturaDeleteResource(Resource):
     def delete(self, id_factura):
         from app.services.storage import FacturaDB
         from app import db
-        factura_db = FacturaDB.query.get(id_factura)
+        factura_db = db.session.get(FacturaDB, id_factura)
         if not factura_db:
             return {'message': 'Factura no encontrada'}, 404
         db.session.delete(factura_db)

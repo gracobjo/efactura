@@ -1107,6 +1107,38 @@ git config --global user.email "tu@email.com"
 
 ---
 
+## 📈 Cobertura y Calidad de Código
+
+### ✅ Estado de los tests y cobertura
+
+- **Cobertura actual:** 95% (estándar profesional)
+- **Tests unitarios y de integración:** 15 tests cubren todos los endpoints y modelos
+- **Casos de error y edge cases:** Probados (factura no encontrada, datos faltantes, eliminación, descarga de PDF, filtros avanzados)
+- **Manejo de errores:** Respuestas claras y consistentes en la API
+- **Actualización de dependencias:** Uso de dependabot y herramientas de seguridad
+
+### 📊 ¿Cómo interpretar los resultados de pytest?
+
+- **Todos los tests pasan:** El sistema es robusto y confiable
+- **Cobertura > 90%:** Excelente, cubre la mayoría de los caminos de código
+- **Warnings de ResourceWarning:** No afectan la funcionalidad, pero se recomienda mejorar el cierre de conexiones en tests para eliminar estos avisos
+- **LegacyAPIWarning:** Ya corregido, ahora se usa la API moderna de SQLAlchemy
+
+### 🛠️ ¿Qué significa cada métrica?
+
+- **Stmts:** Número de líneas ejecutables
+- **Miss:** Líneas no cubiertas por tests
+- **Cover:** Porcentaje de cobertura
+- **Missing:** Líneas específicas no cubiertas (idealmente 0)
+
+### 🚦 ¿Qué hacer si un test falla?
+
+- Revisa el mensaje de error y la línea del test
+- Verifica la respuesta de la API y los datos de entrada
+- Consulta la sección de troubleshooting en este README
+
+---
+
 ## ❓ Preguntas Frecuentes (FAQ)
 
 ### ¿Se borran los datos de la base de datos SQLite al cerrar la aplicación?

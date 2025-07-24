@@ -68,7 +68,7 @@ def guardar_factura(factura):
     return factura_db.id
 
 def obtener_factura(id_factura):
-    factura_db = FacturaDB.query.get(id_factura)
+    factura_db = db.session.get(FacturaDB, id_factura)
     if not factura_db:
         return None
     # Reconstruir objetos de dominio
