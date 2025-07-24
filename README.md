@@ -839,6 +839,195 @@ print("PDF generado en:", pdf_path)
 
 ---
 
+## 🐙 Comandos Git Utilizados
+
+### 📋 Resumen de Comandos Git en el Proyecto
+
+Durante el desarrollo de eFactura, hemos utilizado los siguientes comandos de Git para gestionar el versionado del código:
+
+#### 🔧 **Configuración Inicial**
+```bash
+# Inicializar repositorio Git (ya existía)
+git init
+
+# Verificar estado del repositorio
+git status
+
+# Verificar ramas locales y remotas
+git branch -a
+```
+
+#### 📤 **Gestión de Cambios**
+```bash
+# Agregar todos los archivos al staging area
+git add .
+
+# Agregar archivo específico
+git add README.md
+
+# Ver archivos en staging area
+git status
+
+# Crear commit con mensaje descriptivo
+git commit -m "feat: Complete eFactura project with API endpoints, tests, and documentation"
+
+# Crear commit para documentación
+git commit -m "docs: Clarify port usage and add troubleshooting section"
+
+# Crear commit para correcciones
+git commit -m "fix: Correct pip install syntax for Colab and add Colab documentation"
+```
+
+#### 🔄 **Gestión de Ramas**
+```bash
+# Ver todas las ramas (locales y remotas)
+git branch -a
+
+# Cambiar a rama main
+git checkout main
+
+# Crear nueva rama desde rama remota
+git fetch origin
+git checkout main
+
+# Eliminar rama local master
+git branch -d master
+
+# Eliminar rama remota master
+git push origin --delete master
+```
+
+#### 📡 **Sincronización con GitHub**
+```bash
+# Verificar repositorios remotos configurados
+git remote -v
+
+# Obtener cambios del repositorio remoto
+git fetch origin
+
+# Subir cambios a GitHub (rama master)
+git push origin master
+
+# Subir cambios a GitHub (rama main)
+git push origin main
+
+# Subir cambios forzados (cuando hay conflictos)
+git push origin main --force
+```
+
+#### 🔍 **Información y Logs**
+```bash
+# Ver historial de commits (últimos 5)
+git log --oneline -5
+
+# Ver diferencias entre ramas
+git ls-remote --heads origin
+```
+
+### 🎯 **¿Por qué usamos estos comandos?**
+
+#### **1. `git init`**
+- **Propósito:** Inicializar un repositorio Git local
+- **Cuándo:** Al comenzar un proyecto nuevo
+- **Resultado:** Crea la carpeta `.git` con toda la configuración
+
+#### **2. `git add .`**
+- **Propósito:** Agregar todos los archivos modificados al staging area
+- **Cuándo:** Después de hacer cambios en el código
+- **Alternativa:** `git add archivo_especifico` para archivos individuales
+
+#### **3. `git commit -m "mensaje"`**
+- **Propósito:** Crear un punto de guardado con los cambios
+- **Convención:** Usamos mensajes descriptivos con prefijos:
+  - `feat:` para nuevas funcionalidades
+  - `docs:` para documentación
+  - `fix:` para correcciones
+  - `refactor:` para refactorización
+
+#### **4. `git push origin main`**
+- **Propósito:** Subir cambios locales al repositorio remoto en GitHub
+- **Cuándo:** Después de hacer commits locales
+- **Importante:** `origin` es el alias del repositorio remoto
+
+#### **5. `git branch -a`**
+- **Propósito:** Ver todas las ramas (locales y remotas)
+- **Cuándo:** Para entender la estructura del repositorio
+- **Resultado:** Muestra `* main` (rama actual) y `remotes/origin/main`
+
+#### **6. `git checkout main`**
+- **Propósito:** Cambiar a la rama main
+- **Cuándo:** Para trabajar en la rama principal
+- **Nota:** GitHub ahora usa `main` por defecto en lugar de `master`
+
+#### **7. `git push origin main --force`**
+- **Propósito:** Forzar la subida de cambios (sobrescribe el historial remoto)
+- **Cuándo:** Solo cuando es necesario resolver conflictos
+- **⚠️ Precaución:** Puede perder cambios en el repositorio remoto
+
+#### **8. `git push origin --delete master`**
+- **Propósito:** Eliminar la rama master del repositorio remoto
+- **Cuándo:** Para limpiar y usar solo la rama main
+- **Resultado:** Simplifica la estructura del repositorio
+
+### 📚 **Flujo de Trabajo Típico**
+
+```bash
+# 1. Hacer cambios en el código
+# 2. Verificar qué archivos cambiaron
+git status
+
+# 3. Agregar cambios al staging
+git add .
+
+# 4. Crear commit con mensaje descriptivo
+git commit -m "tipo: descripción del cambio"
+
+# 5. Subir cambios a GitHub
+git push origin main
+
+# 6. Verificar que se subieron correctamente
+git status
+```
+
+### 🔄 **Resolución de Problemas Comunes**
+
+#### **Problema: "Cannot connect to GitHub"**
+```bash
+# Verificar configuración remota
+git remote -v
+
+# Si no hay origin, agregarlo
+git remote add origin https://github.com/usuario/repositorio.git
+```
+
+#### **Problema: "Branch diverged"**
+```bash
+# Obtener cambios remotos
+git fetch origin
+
+# Hacer merge o rebase
+git merge origin/main
+# O
+git rebase origin/main
+```
+
+#### **Problema: "Permission denied"**
+```bash
+# Configurar credenciales
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu@email.com"
+```
+
+### 🎓 **Buenas Prácticas de Git**
+
+1. **Commits frecuentes:** Hacer commits pequeños y frecuentes
+2. **Mensajes descriptivos:** Usar mensajes que expliquen el "qué" y "por qué"
+3. **Rama principal limpia:** Mantener `main` siempre funcional
+4. **Pull antes de push:** Siempre sincronizar antes de subir cambios
+5. **Revisar antes de commit:** Usar `git status` y `git diff` antes de commit
+
+---
+
 ## ❓ Preguntas Frecuentes (FAQ)
 
 ### ¿Se borran los datos de la base de datos SQLite al cerrar la aplicación?
