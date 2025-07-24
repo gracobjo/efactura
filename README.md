@@ -148,8 +148,42 @@ echo "REACT_APP_API_URL=http://localhost:5000" > .env
    ```
    La aplicación estará en `http://localhost:3000`
 
-### Crear una Factura
+### 🚀 Iniciar la Aplicación
 
+**IMPORTANTE:** Necesitas tener **ambos servicios** ejecutándose:
+
+1. **Backend (API):** Debe estar en `http://localhost:5000`
+2. **Frontend (Interfaz):** Debe estar en `http://localhost:3000`
+
+#### Opción 1: Usar solo la API (Recomendado para pruebas rápidas)
+
+Si solo quieres probar la API sin el frontend:
+
+```bash
+# Solo ejecuta el backend
+python run.py
+```
+
+Luego usa Postman, curl o PowerShell para hacer peticiones a `http://localhost:5000/factura`
+
+#### Opción 2: Usar la interfaz web completa
+
+1. **Terminal 1 - Backend:**
+   ```bash
+   python run.py
+   ```
+
+2. **Terminal 2 - Frontend:**
+   ```bash
+   cd frontend
+   npm start
+   ```
+
+3. **Abrir navegador:** `http://localhost:3000`
+
+### 📝 Crear una Factura
+
+#### Con la interfaz web (puerto 3000):
 1. Abre el navegador en `http://localhost:3000`
 2. Haz clic en la pestaña **"Crear Factura"**
 3. Completa los datos del cliente:
@@ -164,12 +198,21 @@ echo "REACT_APP_API_URL=http://localhost:5000" > .env
 6. Haz clic en **"Crear Factura"**
 7. El PDF se descargará automáticamente
 
-### Verificar una Factura
+#### Con la API directamente (puerto 5000):
+Ver ejemplos más abajo con Postman, curl o PowerShell.
 
+### 🔍 Verificar una Factura
+
+#### Con la interfaz web:
 1. Haz clic en la pestaña **"Verificar Factura"**
 2. Ingresa el ID de la factura
 3. Haz clic en **"Verificar"**
 4. Se mostrarán los datos básicos de la factura
+
+#### Con la API directamente:
+```bash
+curl http://localhost:5000/verificar/1
+```
 
 ### Análisis de Facturación
 
@@ -180,6 +223,39 @@ Esto mostrará:
 - Total facturado por mes
 - Facturación por cliente
 - Gráfico de barras
+
+### 🔧 Solución de Problemas
+
+#### ❌ Error: "Cannot connect to localhost:3000"
+**Causa:** El frontend no está ejecutándose
+**Solución:**
+```bash
+cd frontend
+npm install  # Si no has instalado las dependencias
+npm start
+```
+
+#### ❌ Error: "Cannot connect to localhost:5000"
+**Causa:** El backend no está ejecutándose
+**Solución:**
+```bash
+python run.py
+```
+
+#### ❌ Error: "npm command not found"
+**Causa:** Node.js no está instalado
+**Solución:** Instala Node.js desde https://nodejs.org/
+
+#### ❌ Error: "Module not found" en Python
+**Causa:** Dependencias no instaladas
+**Solución:**
+```bash
+pip install -r requirements.txt
+```
+
+#### ✅ Verificar que todo funciona:
+1. **Backend:** `http://localhost:5000/verificar/1` (debe devolver JSON o 404)
+2. **Frontend:** `http://localhost:3000` (debe mostrar la interfaz)
 
 ---
 
