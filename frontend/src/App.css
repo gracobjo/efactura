@@ -96,7 +96,43 @@ body {
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-intro, .items-intro {
+  background: #f8f9ff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #667eea;
+}
+
+.form-intro p, .items-intro p {
+  color: #555;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.required {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.help-text {
+  background: #e8f4fd;
+  color: #2c5aa0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  border-left: 3px solid #3498db;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .form-group label {
@@ -112,25 +148,61 @@ body {
   border: 2px solid #e1e5e9;
   border-radius: 5px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background-color: white;
+}
+
+.form-group input::placeholder {
+  color: #999;
+  font-style: italic;
 }
 
 /* Ítems dinámicos */
 .item-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr auto;
-  gap: 1rem;
-  align-items: end;
-  padding: 1rem;
   background: #f8f9ff;
-  border-radius: 5px;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e1e5e9;
+  position: relative;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e1e5e9;
+}
+
+.item-header h4 {
+  color: #667eea;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.item-row .form-group {
+  margin-bottom: 1rem;
+}
+
+.subtotal {
+  background: #e8f5e8;
+  color: #2d5a2d;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  text-align: center;
+  border: 1px solid #c3e6c3;
 }
 
 .add-btn, .remove-btn {
@@ -158,6 +230,47 @@ body {
 
 .remove-btn:hover {
   background: #c82333;
+}
+
+/* Sección de totales */
+.total-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.total-calculator h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.total-breakdown {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.total-row:last-child {
+  border-bottom: none;
+}
+
+.total-final {
+  font-size: 1.1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #667eea !important;
+  margin-top: 0.5rem;
 }
 
 /* Botón de envío */
@@ -264,11 +377,206 @@ body {
   }
   
   .item-row {
-    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .item-header {
+    flex-direction: column;
     gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .total-section {
+    padding: 1rem;
+  }
+  
+  .total-breakdown {
+    padding: 0.75rem;
   }
   
   .info-grid {
     grid-template-columns: 1fr;
   }
+  
+  .migradas-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .factura-migrada-card {
+    padding: 1rem;
+  }
+}
+
+/* Estilos para migración de facturas */
+.factura-migrar {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.migrar-intro {
+  background: #f8f9ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  border-left: 4px solid #28a745;
+}
+
+.migrar-intro p {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.migrar-intro ul {
+  list-style: none;
+  padding: 0;
+}
+
+.migrar-intro li {
+  padding: 0.5rem 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.file-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px dashed #667eea;
+  border-radius: 8px;
+  background: #f8f9ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-input:hover {
+  border-color: #28a745;
+  background: #e8f5e8;
+}
+
+.file-info {
+  margin-top: 1rem;
+}
+
+.selected-files {
+  background: #e8f4fd;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 3px solid #3498db;
+}
+
+.selected-files h4 {
+  color: #2c5aa0;
+  margin-bottom: 0.5rem;
+}
+
+.selected-files ul {
+  list-style: none;
+  padding: 0;
+}
+
+.selected-files li {
+  padding: 0.25rem 0;
+  color: #555;
+}
+
+.facturas-migradas {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.facturas-migradas h3 {
+  color: #28a745;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.migradas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.factura-migrada-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.factura-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e1e5e9;
+}
+
+.factura-header h4 {
+  color: #667eea;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.factura-id {
+  background: #667eea;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.factura-details {
+  margin-bottom: 1rem;
+}
+
+.factura-details p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+.factura-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.download-btn, .verify-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.download-btn {
+  background: #28a745;
+  color: white;
+}
+
+.download-btn:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.verify-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.verify-btn:hover {
+  background: #138496;
+  transform: translateY(-1px);
 } 

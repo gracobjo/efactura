@@ -12,12 +12,13 @@ const FacturaForm = () => {
       {
         descripcion: '',
         cantidad: 1,
-        precio_unitario: 0
+        precio: 0
       }
     ]
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [focusedField, setFocusedField] = useState('');
 
   const handleClienteChange = (field, value) => {
     setFormData(prev => ({
@@ -38,10 +39,22 @@ const FacturaForm = () => {
     }));
   };
 
+  const getFieldHelp = (field) => {
+    const helpTexts = {
+      'cliente.nombre': 'Ingresa el nombre completo del cliente (ej: Juan Pérez)',
+      'cliente.direccion': 'Ingresa la dirección completa del cliente (ej: Calle Mayor 123, Madrid)',
+      'cliente.identificacion': 'Ingresa el DNI/NIF del cliente (ej: 12345678A)',
+      'item.descripcion': 'Describe el producto o servicio (ej: Desarrollo web, Consultoría)',
+      'item.cantidad': 'Número de unidades o horas del servicio',
+      'item.precio': 'Precio por unidad en euros (ej: 50.00)'
+    };
+    return helpTexts[field] || '';
+  };
+
   const addItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { descripcion: '', cantidad: 1, precio_unitario: 0 }]
+      items: [...prev.items, { descripcion: '', cantidad: 1, precio: 0 }]
     }));
   };
 
@@ -73,7 +86,7 @@ const FacturaForm = () => {
       setMessage('¡Factura creada exitosamente! El PDF se ha descargado.');
       setFormData({
         cliente: { nombre: '', direccion: '', identificacion: '' },
-        items: [{ descripcion: '', cantidad: 1, precio_unitario: 0 }]
+        items: [{ descripcion: '', cantidad: 1, precio: 0 }]
       });
     } catch (error) {
       setMessage(`Error: ${error.response?.data?.message || 'Error al crear la factura'}`);
@@ -85,90 +98,159 @@ const FacturaForm = () => {
   return (
     <div className="factura-form">
       <h2>Crear Nueva Factura</h2>
+      <div className="form-intro">
+        <p>Completa los datos del cliente y los productos/servicios para generar la factura.</p>
+      </div>
       <form onSubmit={handleSubmit}>
         <div className="cliente-section">
-          <h3>Datos del Cliente</h3>
+          <h3>📋 Datos del Cliente</h3>
           <div className="form-group">
-            <label>Nombre:</label>
+            <label>Nombre completo: <span className="required">*</span></label>
             <input
               type="text"
+              placeholder="Ej: Juan Pérez García"
               value={formData.cliente.nombre}
               onChange={(e) => handleClienteChange('nombre', e.target.value)}
+              onFocus={() => setFocusedField('cliente.nombre')}
+              onBlur={() => setFocusedField('')}
               required
             />
+            {focusedField === 'cliente.nombre' && (
+              <div className="help-text">{getFieldHelp('cliente.nombre')}</div>
+            )}
           </div>
           <div className="form-group">
-            <label>Dirección:</label>
+            <label>Dirección completa: <span className="required">*</span></label>
             <input
               type="text"
+              placeholder="Ej: Calle Mayor 123, 28001 Madrid"
               value={formData.cliente.direccion}
               onChange={(e) => handleClienteChange('direccion', e.target.value)}
+              onFocus={() => setFocusedField('cliente.direccion')}
+              onBlur={() => setFocusedField('')}
               required
             />
+            {focusedField === 'cliente.direccion' && (
+              <div className="help-text">{getFieldHelp('cliente.direccion')}</div>
+            )}
           </div>
           <div className="form-group">
-            <label>Identificación:</label>
+            <label>DNI/NIF: <span className="required">*</span></label>
             <input
               type="text"
+              placeholder="Ej: 12345678A"
               value={formData.cliente.identificacion}
               onChange={(e) => handleClienteChange('identificacion', e.target.value)}
+              onFocus={() => setFocusedField('cliente.identificacion')}
+              onBlur={() => setFocusedField('')}
               required
             />
+            {focusedField === 'cliente.identificacion' && (
+              <div className="help-text">{getFieldHelp('cliente.identificacion')}</div>
+            )}
           </div>
         </div>
 
         <div className="items-section">
-          <h3>Ítems de la Factura</h3>
+          <h3>🛍️ Productos/Servicios</h3>
+          <div className="items-intro">
+            <p>Agrega los productos o servicios que vas a facturar. Puedes agregar múltiples ítems.</p>
+          </div>
           {formData.items.map((item, index) => (
             <div key={index} className="item-row">
-              <div className="form-group">
-                <label>Descripción:</label>
-                <input
-                  type="text"
-                  value={item.descripcion}
-                  onChange={(e) => handleItemChange(index, 'descripcion', e.target.value)}
-                  required
-                />
+              <div className="item-header">
+                <h4>Ítem {index + 1}</h4>
+                {formData.items.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    className="remove-btn"
+                    title="Eliminar este ítem"
+                  >
+                    🗑️ Eliminar
+                  </button>
+                )}
               </div>
               <div className="form-group">
-                <label>Cantidad:</label>
+                <label>Descripción: <span className="required">*</span></label>
+                <input
+                  type="text"
+                  placeholder="Ej: Desarrollo web, Consultoría, Producto X"
+                  value={item.descripcion}
+                  onChange={(e) => handleItemChange(index, 'descripcion', e.target.value)}
+                  onFocus={() => setFocusedField('item.descripcion')}
+                  onBlur={() => setFocusedField('')}
+                  required
+                />
+                {focusedField === 'item.descripcion' && (
+                  <div className="help-text">{getFieldHelp('item.descripcion')}</div>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Cantidad: <span className="required">*</span></label>
                 <input
                   type="number"
                   min="1"
+                  placeholder="1"
                   value={item.cantidad}
                   onChange={(e) => handleItemChange(index, 'cantidad', parseInt(e.target.value))}
+                  onFocus={() => setFocusedField('item.cantidad')}
+                  onBlur={() => setFocusedField('')}
                   required
                 />
+                {focusedField === 'item.cantidad' && (
+                  <div className="help-text">{getFieldHelp('item.cantidad')}</div>
+                )}
               </div>
               <div className="form-group">
-                <label>Precio Unitario:</label>
+                <label>Precio por unidad (€): <span className="required">*</span></label>
                 <input
                   type="number"
                   min="0"
                   step="0.01"
-                  value={item.precio_unitario}
-                  onChange={(e) => handleItemChange(index, 'precio_unitario', parseFloat(e.target.value))}
+                  placeholder="0.00"
+                  value={item.precio}
+                  onChange={(e) => handleItemChange(index, 'precio', parseFloat(e.target.value))}
+                  onFocus={() => setFocusedField('item.precio')}
+                  onBlur={() => setFocusedField('')}
                   required
                 />
+                {focusedField === 'item.precio' && (
+                  <div className="help-text">{getFieldHelp('item.precio')}</div>
+                )}
+                <div className="subtotal">
+                  Subtotal: {(item.cantidad * item.precio).toFixed(2)} €
+                </div>
               </div>
-              {formData.items.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeItem(index)}
-                  className="remove-btn"
-                >
-                  Eliminar
-                </button>
-              )}
             </div>
           ))}
           <button type="button" onClick={addItem} className="add-btn">
-            Agregar Ítem
+            ➕ Agregar otro ítem
           </button>
         </div>
 
+        <div className="total-section">
+          <div className="total-calculator">
+            <h4>💰 Resumen de la Factura</h4>
+            <div className="total-breakdown">
+              <div className="total-row">
+                <span>Subtotal:</span>
+                <span>{formData.items.reduce((sum, item) => sum + (item.cantidad * item.precio), 0).toFixed(2)} €</span>
+              </div>
+              <div className="total-row">
+                <span>IVA (21%):</span>
+                <span>{(formData.items.reduce((sum, item) => sum + (item.cantidad * item.precio), 0) * 0.21).toFixed(2)} €</span>
+              </div>
+              <div className="total-row total-final">
+                <span><strong>Total:</strong></span>
+                <span><strong>{(formData.items.reduce((sum, item) => sum + (item.cantidad * item.precio), 0) * 1.21).toFixed(2)} €</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button type="submit" disabled={loading} className="submit-btn">
-          {loading ? 'Creando...' : 'Crear Factura'}
+          {loading ? '🔄 Generando factura...' : '📄 Generar Factura PDF'}
         </button>
       </form>
 

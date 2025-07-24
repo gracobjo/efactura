@@ -81,9 +81,11 @@ Sistema de facturación electrónica completo con backend en Python (Flask) y fr
 - **Backend API REST** con Flask para crear y verificar facturas
 - **Frontend React** con interfaz moderna y responsive
 - **Generación de PDF** con datos, ítems, total, IVA y código QR
+- **Migración de PDFs** - Sube facturas PDF existentes y las convierte automáticamente
 - **Almacenamiento en SQLite** con SQLAlchemy
 - **Análisis de facturación** con Pandas y Matplotlib
 - **Código QR** para verificación de facturas
+- **Formato español** - Moneda en EUR y formato numérico español (punto para miles, coma para decimales)
 
 ---
 
@@ -198,6 +200,26 @@ Luego usa Postman, curl o PowerShell para hacer peticiones a `http://localhost:5
 5. Haz clic en **"Agregar Ítem"** si necesitas más productos
 6. Haz clic en **"Crear Factura"**
 7. El PDF se descargará automáticamente
+
+### 🔄 Migrar Facturas PDF Existentes
+
+#### Con la interfaz web:
+1. Haz clic en la pestaña **"Migrar PDFs"**
+2. Selecciona uno o más archivos PDF de facturas existentes
+3. Haz clic en **"Migrar Facturas"**
+4. El sistema:
+   - Extraerá automáticamente los datos del PDF (número, fecha, cliente, total)
+   - Creará una nueva factura en la base de datos
+   - Generará un nuevo PDF con código QR
+   - Te mostrará un enlace para descargar el nuevo PDF
+   - Te permitirá verificar la factura migrada
+
+#### Datos que se extraen automáticamente:
+- **Número de factura** (patrón: Factura N° o similar)
+- **Fecha** (patrón: DD/MM/YYYY o DD-MM-YYYY)
+- **Cliente** (nombre del cliente)
+- **Total** (monto total de la factura)
+- **Ítem genérico** basado en el total extraído
 
 #### Con la API directamente (puerto 5000):
 Ver ejemplos más abajo con Postman, curl o PowerShell.
@@ -359,6 +381,7 @@ eFactura/
 - SQLAlchemy (ORM)
 - fpdf (Generación de PDF)
 - qrcode (Códigos QR)
+- PyPDF2 (Extracción de datos de PDFs)
 - Pandas (Análisis de datos)
 
 **Frontend:**
@@ -598,6 +621,7 @@ Edita `analisis_facturas.py` para agregar:
 | Método | Endpoint                                 | Descripción                                      |
 |--------|------------------------------------------|--------------------------------------------------|
 | POST   | /factura                                 | Crear una factura y devolver el PDF generado     |
+| POST   | /migrar-facturas                         | Migrar facturas PDF existentes al sistema        |
 | GET    | /verificar/{id_factura}                  | Verificar una factura por su ID                  |
 | GET    | /facturas                                | Buscar y listar facturas con filtros avanzados   |
 | GET    | /factura/{id_factura}/pdf                | Descargar el PDF de una factura por su ID        |
@@ -626,7 +650,39 @@ curl -X POST http://localhost:5000/factura \
 
 **Response:** Archivo PDF (Content-Type: application/pdf)
 
-#### 2. GET /verificar/{id_factura} - Verificar factura
+#### 2. POST /migrar-facturas - Migrar facturas PDF
+
+**Request:**
+```bash
+curl -X POST http://localhost:5000/migrar-facturas \
+  -F "files=@factura1.pdf" \
+  -F "files=@factura2.pdf"
+```
+
+**Response:**
+```json
+{
+  "message": "Se migraron 2 facturas exitosamente",
+  "facturas_migradas": [
+    {
+      "archivo_original": "factura1.pdf",
+      "id_factura_nueva": 10,
+      "numero_factura": "FAC-20250725-ABC123",
+      "total": "500,00 EUR",
+      "pdf_nuevo": "/factura/10/pdf"
+    },
+    {
+      "archivo_original": "factura2.pdf",
+      "id_factura_nueva": 11,
+      "numero_factura": "FAC-20250725-DEF456",
+      "total": "750,00 EUR",
+      "pdf_nuevo": "/factura/11/pdf"
+    }
+  ]
+}
+```
+
+#### 3. GET /verificar/{id_factura} - Verificar factura
 
 **Request:**
 ```bash
@@ -636,31 +692,15 @@ curl -X GET http://localhost:5000/verificar/1
 **Response:**
 ```json
 {
-  "id": 1,
   "numero": "FAC-20241201-ABC123",
-  "fecha": "2024-12-01T10:30:00",
+  "fecha": "2024-12-01",
   "cliente": {
     "nombre": "Carlos Ruiz",
-    "direccion": "Calle Nueva 456",
     "identificacion": "11223344C"
   },
-  "items": [
-    {
-      "descripcion": "Producto Z",
-      "cantidad": 2,
-      "precio_unitario": 150.0,
-      "subtotal": 300.0
-    },
-    {
-      "descripcion": "Servicio Y",
-      "cantidad": 1,
-      "precio_unitario": 300.0,
-      "subtotal": 300.0
-    }
-  ],
-  "total": 600.0,
-  "iva": 126.0,
-  "total_con_iva": 726.0
+  "total": "600,00 EUR",
+  "iva": "126,00 EUR",
+  "total_con_iva": "726,00 EUR"
 }
 ```
 

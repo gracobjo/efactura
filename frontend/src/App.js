@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import FacturaForm from './components/FacturaForm';
 import FacturaVerificar from './components/FacturaVerificar';
+import FacturaMigrar from './components/FacturaMigrar';
 import './App.css';
 
 function App() {
@@ -25,11 +26,18 @@ function App() {
         >
           Verificar Factura
         </button>
+        <button 
+          className={`tab ${activeTab === 'migrar' ? 'active' : ''}`}
+          onClick={() => setActiveTab('migrar')}
+        >
+          Migrar PDFs
+        </button>
       </nav>
 
       <main className="main-content">
         {activeTab === 'crear' && <FacturaForm />}
         {activeTab === 'verificar' && <FacturaVerificar />}
+        {activeTab === 'migrar' && <FacturaMigrar />}
       </main>
 
       <footer className="App-footer">

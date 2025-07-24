@@ -3,6 +3,7 @@ Flask-RESTful
 Flask-SQLAlchemy
 fpdf
 qrcode
+PyPDF2
 pandas
 matplotlib
 

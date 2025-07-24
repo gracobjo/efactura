@@ -10,6 +10,11 @@ IVA_PORCENTAJE = 0.21  # 21% de IVA
 BASE_URL_VERIFICACION = "http://localhost:5000/verificar/"  # Cambia según despliegue
 
 
+def formatear_euros(valor):
+    """Formatea un valor numérico en formato español con símbolo de euro"""
+    return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " EUR"
+
+
 def generar_hash_factura(numero, nif, fecha):
     # Hash simple usando SHA256 de los campos clave
     hash_input = f"{numero}|{nif}|{fecha}"
@@ -68,8 +73,8 @@ def generar_pdf(factura, id_factura):
     for item in factura.items:
         pdf.cell(80, 10, str(item.descripcion), 1)
         pdf.cell(30, 10, str(item.cantidad), 1)
-        pdf.cell(40, 10, f"{item.precio_unitario:.2f}", 1)
-        pdf.cell(40, 10, f"{item.subtotal():.2f}", 1, ln=True)
+        pdf.cell(40, 10, formatear_euros(item.precio_unitario), 1)
+        pdf.cell(40, 10, formatear_euros(item.subtotal()), 1, ln=True)
 
     pdf.ln(5)
     total_sin_iva = factura.calcular_total()
@@ -80,17 +85,17 @@ def generar_pdf(factura, id_factura):
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(60, 10, "Total sin IVA:", 0)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, f"{total_sin_iva:.2f}", ln=True)
+    pdf.cell(0, 10, formatear_euros(total_sin_iva), ln=True)
 
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(60, 10, f"IVA ({int(IVA_PORCENTAJE*100)}%):", 0)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, f"{iva:.2f}", ln=True)
+    pdf.cell(0, 10, formatear_euros(iva), ln=True)
 
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(60, 10, "Total con IVA:", 0)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, f"{total_con_iva:.2f}", ln=True)
+    pdf.cell(0, 10, formatear_euros(total_con_iva), ln=True)
 
     pdf.ln(10)
     # Leyenda de factura verificable

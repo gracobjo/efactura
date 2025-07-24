@@ -1,0 +1,14 @@
+FACTURA N°: FAC-2024-001
+Fecha: 15/07/2024
+
+Cliente: Empresa ABC S.L.
+Dirección: Calle Mayor 123, Madrid
+Identificación: B12345678
+
+Descripción: Servicios de consultoría
+Cantidad: 10 horas
+Precio unitario: 50,00 EUR
+Subtotal: 500,00 EUR
+
+IVA (21%): 105,00 EUR
+Total: 605,00 EUR 

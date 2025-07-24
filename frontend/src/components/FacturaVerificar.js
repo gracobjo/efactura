@@ -70,7 +70,13 @@ const FacturaVerificar = () => {
               <strong>Identificación:</strong> {factura.cliente.identificacion}
             </div>
             <div className="info-item">
-              <strong>Total:</strong> ${factura.total.toFixed(2)}
+              <strong>Total:</strong> {factura.total}
+            </div>
+            <div className="info-item">
+              <strong>IVA:</strong> {factura.iva}
+            </div>
+            <div className="info-item">
+              <strong>Total con IVA:</strong> {factura.total_con_iva}
             </div>
           </div>
         </div>
