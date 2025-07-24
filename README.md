@@ -837,6 +837,170 @@ bandit -r app/
 safety check
 ```
 
+### 🚀 **Configuración en Otro Ordenador**
+
+#### **Guía Completa para Configurar eFactura en Otro Ordenador**
+
+##### **1. Clonar el Proyecto**
+```bash
+git clone https://github.com/gracobjo/efactura.git
+cd efactura
+```
+
+##### **2. Configurar el Backend (Python)**
+```bash
+# Crear entorno virtual (recomendado)
+python -m venv venv
+
+# Activar el entorno virtual
+# En Windows:
+venv\Scripts\activate
+# En macOS/Linux:
+source venv/bin/activate
+
+# Instalar dependencias Python
+pip install -r requirements.txt
+
+# Inicializar la base de datos
+python run.py &
+python poblar_db.py
+```
+
+##### **3. Configurar el Frontend (React)**
+```bash
+# Navegar a la carpeta frontend
+cd frontend
+
+# Instalar dependencias de Node.js
+npm install
+
+# Iniciar el servidor de desarrollo
+npm start
+```
+
+##### **4. Verificar que Todo Funciona**
+
+**Backend (puerto 5000):**
+```bash
+# En otra terminal, verificar que el backend esté funcionando
+curl http://localhost:5000/verificar/1
+```
+
+**Frontend (puerto 3000):**
+- Abrir navegador en `http://localhost:3000`
+- Deberías ver la interfaz de eFactura
+
+##### **5. Ejecutar Tests (Opcional)**
+```bash
+# Desde la raíz del proyecto
+pytest --cov=app --cov-report=html
+```
+
+#### **🔧 Requisitos Previos en el Otro Ordenador**
+
+**Python:**
+- Python 3.8+ instalado
+- pip disponible
+
+**Node.js:**
+- Node.js 14+ instalado
+- npm disponible
+
+**Verificar Instalaciones:**
+```bash
+python --version
+node --version
+npm --version
+```
+
+#### **📋 Comandos Rápidos (Copy & Paste)**
+
+**Para Windows:**
+```bash
+git clone https://github.com/gracobjo/efactura.git
+cd efactura
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python run.py &
+python poblar_db.py
+cd frontend
+npm install
+npm start
+```
+
+**Para macOS/Linux:**
+```bash
+git clone https://github.com/gracobjo/efactura.git
+cd efactura
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python run.py &
+python poblar_db.py
+cd frontend
+npm install
+npm start
+```
+
+#### **🎯 ¿Qué Pasará?**
+
+1. **Backend:** Se ejecutará en `http://localhost:5000`
+2. **Frontend:** Se abrirá automáticamente en `http://localhost:3000`
+3. **Base de datos:** Se creará con datos de ejemplo
+4. **Interfaz:** Podrás crear y verificar facturas
+
+#### **🔍 Solución de Problemas Comunes**
+
+**Si npm no está disponible:**
+```bash
+# Instalar Node.js desde: https://nodejs.org/
+# Descargar la versión LTS
+```
+
+**Si hay errores de permisos:**
+```bash
+# En Windows, ejecutar PowerShell como administrador
+# En macOS/Linux:
+sudo npm install
+```
+
+**Si el puerto 3000 está ocupado:**
+```bash
+# npm te preguntará si quieres usar otro puerto
+# Simplemente presiona 'Y'
+```
+
+**Si el puerto 5000 está ocupado:**
+```bash
+# Cambiar en config.py:
+# SQLALCHEMY_DATABASE_URI = 'sqlite:///efactura.db'
+# Y ejecutar en otro puerto:
+python run.py --port 5001
+```
+
+#### **📱 Verificar que Todo Funciona**
+
+**1. Backend:**
+```bash
+curl http://localhost:5000/facturas
+# Debería devolver JSON con las facturas
+```
+
+**2. Frontend:**
+- Ir a `http://localhost:3000`
+- Ver la interfaz con dos pestañas: "Crear Factura" y "Verificar Factura"
+
+**3. Crear una Factura de Prueba:**
+- Usar la interfaz web
+- O usar curl:
+```bash
+curl -X POST http://localhost:5000/factura \
+  -H "Content-Type: application/json" \
+  -d @factura.json \
+  --output test_factura.pdf
+```
+
 ### 📊 **Badges de Estado**
 
 Una vez configurado, puedes agregar estos badges a tu README:
