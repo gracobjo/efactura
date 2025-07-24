@@ -785,6 +785,60 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ---
 
+## 🌐 Google Colab
+
+### 🚀 Usar eFactura en Google Colab
+
+Para ejecutar el proyecto directamente en Google Colab sin instalar nada localmente:
+
+1. **Abre Google Colab:** https://colab.research.google.com/
+2. **Sube el archivo:** `demo_colab.ipynb` desde este repositorio
+3. **Ejecuta las celdas** en orden
+
+**Nota importante:** En Colab, usa `%pip install` en lugar de `!pip install` para evitar advertencias.
+
+### 📋 Pasos en Colab:
+
+```python
+# 1. Clonar el repositorio
+!git clone https://github.com/gracobjo/efactura.git
+%cd efactura
+
+# 2. Instalar dependencias (usando %pip)
+%pip install -r requirements.txt
+
+# 3. Inicializar y poblar la base de datos
+import os
+os.makedirs('instance', exist_ok=True)
+!python run.py &
+!python poblar_db.py
+
+# 4. Analizar facturas
+!python analisis_facturas.py
+
+# 5. Generar PDF de ejemplo
+from app import create_app
+from app.models.factura import Cliente, Item, Factura
+from app.services import pdf_generator
+
+app = create_app()
+app.app_context().push()
+
+cliente = Cliente("Demo Colab", "Calle Colab 1", "COLAB123")
+items = [Item("Producto Colab", 1, 99.99)]
+factura = Factura(cliente, items)
+pdf_path = pdf_generator.generar_pdf(factura, "colab_demo")
+print("PDF generado en:", pdf_path)
+```
+
+### ✅ Ventajas de usar Colab:
+- **Sin instalación local** de Python o dependencias
+- **Acceso gratuito** a recursos de computación
+- **Interfaz web** fácil de usar
+- **Compartir notebooks** fácilmente
+
+---
+
 ## ❓ Preguntas Frecuentes (FAQ)
 
 ### ¿Se borran los datos de la base de datos SQLite al cerrar la aplicación?
