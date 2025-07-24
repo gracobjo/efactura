@@ -4,4 +4,12 @@ Flask-SQLAlchemy
 fpdf
 qrcode
 pandas
-matplotlib 
+matplotlib
+
+# Development and CI/CD tools
+pytest
+pytest-cov
+flake8
+black
+bandit
+safety 

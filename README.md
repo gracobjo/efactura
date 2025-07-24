@@ -94,6 +94,7 @@ Sistema de facturación electrónica completo con backend en Python (Flask) y fr
 - [Manual de Desarrollador](#manual-de-desarrollador)
 - [API REST](#api-rest)
 - [Análisis de Datos](#análisis-de-datos)
+- [CI/CD y Despliegue](#cicd-y-despliegue)
 - [Despliegue](#despliegue)
 
 ---
@@ -782,6 +783,84 @@ Para el endpoint `GET /facturas`, puedes usar estos filtros:
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles. 
+
+---
+
+## 🔄 CI/CD y Despliegue
+
+### 🚀 Continuous Integration/Continuous Deployment
+
+El proyecto incluye un pipeline completo de CI/CD configurado con GitHub Actions:
+
+#### ✅ **Tests Automatizados**
+- **Tests unitarios** con pytest
+- **Tests de integración** para la API
+- **Cobertura de código** con reportes HTML y XML
+- **Múltiples versiones de Python** (3.8, 3.9, 3.10, 3.11)
+
+#### 🔍 **Análisis de Código**
+- **Linting** con flake8
+- **Formateo** con black
+- **Análisis de seguridad** con bandit y safety
+- **Reportes de calidad** automáticos
+
+#### 🏗️ **Build y Deploy**
+- **Build automático** en cada push a main
+- **Artefactos** generados automáticamente
+- **Deploy a staging** (configurable)
+- **Notificaciones** de éxito/fallo
+
+#### 📦 **Gestión de Dependencias**
+- **Dependabot** para actualizaciones automáticas
+- **Seguridad** de dependencias monitoreada
+- **Pull requests** automáticos para actualizaciones
+
+### 🛠️ **Configuración Local de CI/CD**
+
+Para ejecutar las herramientas de CI/CD localmente:
+
+```bash
+# Instalar herramientas de desarrollo
+pip install pytest-cov flake8 black bandit safety
+
+# Ejecutar tests con cobertura
+pytest --cov=app --cov-report=html
+
+# Linting
+flake8 .
+
+# Formateo de código
+black .
+
+# Análisis de seguridad
+bandit -r app/
+safety check
+```
+
+### 📊 **Badges de Estado**
+
+Una vez configurado, puedes agregar estos badges a tu README:
+
+```markdown
+![Tests](https://github.com/gracobjo/efactura/workflows/CI%2FCD%20Pipeline/badge.svg)
+![Coverage](https://codecov.io/gh/gracobjo/efactura/branch/main/graph/badge.svg)
+![Security](https://github.com/gracobjo/efactura/workflows/CI%2FCD%20Pipeline/badge.svg?label=security)
+```
+
+### 🚀 **Opciones de Despliegue**
+
+#### **Backend:**
+- **Heroku** - Fácil despliegue con Git
+- **Railway** - Despliegue automático
+- **Render** - Gratuito para proyectos pequeños
+- **DigitalOcean** - App Platform
+- **AWS/GCP** - Para proyectos empresariales
+
+#### **Frontend:**
+- **Vercel** - Optimizado para React
+- **Netlify** - Despliegue automático
+- **GitHub Pages** - Gratuito
+- **Firebase Hosting** - Integración con Google
 
 ---
 
