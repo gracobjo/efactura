@@ -1,6 +1,80 @@
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tu_usuario/eFactura/blob/main/demo_colab.ipynb)
+
 # eFactura
 
 Sistema de facturación electrónica completo con backend en Python (Flask) y frontend en React.
+
+---
+
+## 🧾 Cómo se genera y verifica una factura electrónica
+
+### 1. Generación de la factura (PDF con QR)
+
+- **Paso 1:** Envía los datos de la factura a la API REST (`/factura`) mediante una petición POST con un JSON como este:
+
+  ```json
+  {
+    "cliente": {
+      "nombre": "Carlos Ruiz",
+      "direccion": "Calle Nueva 456",
+      "identificacion": "11223344C"
+    },
+    "items": [
+      {"descripcion": "Producto Z", "cantidad": 2, "precio_unitario": 150.0},
+      {"descripcion": "Servicio Y", "cantidad": 1, "precio_unitario": 300.0}
+    ]
+  }
+  ```
+
+- **Paso 2:** La API genera:
+  - Un registro en la base de datos con los datos de la factura.
+  - Un PDF en `instance/facturas/` y lo devuelve como respuesta (descarga directa).
+  - El PDF incluye:
+    - Datos del cliente y los ítems
+    - Desglose de total sin IVA, IVA y total con IVA
+    - Un **código QR** que contiene un JSON con los datos mínimos requeridos por el Real Decreto 1007/2023 (NIF emisor, número, fecha, total, hash, URL de verificación)
+    - Una leyenda: `Factura verificable en http://localhost:5000/verificar/<id_factura>`
+
+- **Ejemplo de comando en PowerShell:**
+  ```powershell
+  Invoke-WebRequest -Uri http://localhost:5000/factura `
+    -Method POST `
+    -ContentType "application/json" `
+    -InFile "factura.json" `
+    -OutFile "factura.pdf"
+  ```
+
+### 2. Verificación de la factura
+
+- **Paso 1:** Escanea el QR del PDF con tu móvil o una app de QR.
+- **Paso 2:** El QR contiene un JSON con los datos clave y la URL de verificación.
+- **Paso 3:** Al abrir la URL (por ejemplo, `http://localhost:5000/verificar/1`), la API responde con los datos básicos de la factura, incluyendo:
+  - Número de factura
+  - Fecha
+  - Cliente (nombre e identificación)
+  - Total sin IVA
+  - IVA
+  - Total con IVA
+
+- **Ejemplo de respuesta:**
+  ```json
+  {
+    "numero": "FAC-20250724-9958C5",
+    "fecha": "2025-07-24",
+    "cliente": {
+      "nombre": "Juan Pérez",
+      "identificacion": "12345678A"
+    },
+    "total": 250.0,
+    "iva": 52.5,
+    "total_con_iva": 302.5
+  }
+  ```
+
+- **Leyenda en el PDF:**
+  > Factura verificable en http://localhost:5000/verificar/1
+
+---
 
 ## 🚀 Características
 
@@ -106,6 +180,68 @@ Esto mostrará:
 - Total facturado por mes
 - Facturación por cliente
 - Gráfico de barras
+
+---
+
+## 📨 Ejemplo rápido: Crear una factura y descargar el PDF con Postman
+
+1. Abre Postman y crea una nueva petición:
+   - **Método:** POST
+   - **URL:** `http://localhost:5000/factura`
+
+2. Ve a la pestaña **Body** y selecciona **raw** y **JSON**. Pega el siguiente contenido:
+
+   ```json
+   {
+     "cliente": {
+       "nombre": "Carlos Ruiz",
+       "direccion": "Calle Nueva 456",
+       "identificacion": "11223344C"
+     },
+     "items": [
+       {"descripcion": "Producto Z", "cantidad": 2, "precio_unitario": 150.0},
+       {"descripcion": "Servicio Y", "cantidad": 1, "precio_unitario": 300.0}
+     ]
+   }
+   ```
+
+3. Haz clic en **Send**.
+
+4. Cuando recibas la respuesta (el PDF), haz clic en **Save Response > Save to a file...** y guárdalo como `factura.pdf`.
+
+¡Listo! Así puedes crear y descargar facturas fácilmente usando Postman.
+
+---
+
+## 🖥️ Ejemplo rápido: Crear una factura y descargar el PDF en PowerShell
+
+1. Crea un archivo `factura.json` con el contenido de la factura:
+
+   ```json
+   {
+     "cliente": {
+       "nombre": "Carlos Ruiz",
+       "direccion": "Calle Nueva 456",
+       "identificacion": "11223344C"
+     },
+     "items": [
+       {"descripcion": "Producto Z", "cantidad": 2, "precio_unitario": 150.0},
+       {"descripcion": "Servicio Y", "cantidad": 1, "precio_unitario": 300.0}
+     ]
+   }
+   ```
+
+2. Ejecuta este comando en PowerShell:
+
+   ```powershell
+   Invoke-WebRequest -Uri http://localhost:5000/factura `
+     -Method POST `
+     -ContentType "application/json" `
+     -InFile "factura.json" `
+     -OutFile "factura.pdf"
+   ```
+
+Esto enviará la factura a la API y descargará el PDF generado como `factura.pdf` en tu carpeta actual.
 
 ---
 
@@ -380,35 +516,174 @@ Edita `analisis_facturas.py` para agregar:
 
 ---
 
-## 🚀 Despliegue
+## 🌐 Endpoints de la API REST
 
-### Opciones de Despliegue
+| Método | Endpoint                                 | Descripción                                      |
+|--------|------------------------------------------|--------------------------------------------------|
+| POST   | /factura                                 | Crear una factura y devolver el PDF generado     |
+| GET    | /verificar/{id_factura}                  | Verificar una factura por su ID                  |
+| GET    | /facturas                                | Buscar y listar facturas con filtros avanzados   |
+| GET    | /factura/{id_factura}/pdf                | Descargar el PDF de una factura por su ID        |
+| DELETE | /factura/{id_factura}                    | Eliminar una factura por su ID                   |
 
-**Backend:**
-- Heroku
-- Railway
-- Render
-- DigitalOcean
-- AWS/GCP
+### 📝 Ejemplos de uso para cada endpoint
 
-**Frontend:**
-- Vercel
-- Netlify
-- GitHub Pages
-- Firebase Hosting
+#### 1. POST /factura - Crear factura
 
-### Variables de Entorno
-
-**Backend:**
+**Request:**
 ```bash
-FLASK_ENV=production
-DATABASE_URL=sqlite:///efactura.db
-SECRET_KEY=tu-clave-secreta
+curl -X POST http://localhost:5000/factura \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cliente": {
+      "nombre": "Carlos Ruiz",
+      "direccion": "Calle Nueva 456",
+      "identificacion": "11223344C"
+    },
+    "items": [
+      {"descripcion": "Producto Z", "cantidad": 2, "precio_unitario": 150.0},
+      {"descripcion": "Servicio Y", "cantidad": 1, "precio_unitario": 300.0}
+    ]
+  }'
 ```
 
-**Frontend:**
+**Response:** Archivo PDF (Content-Type: application/pdf)
+
+#### 2. GET /verificar/{id_factura} - Verificar factura
+
+**Request:**
 ```bash
-REACT_APP_API_URL=https://tu-api.herokuapp.com
+curl -X GET http://localhost:5000/verificar/1
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "numero": "FAC-20241201-ABC123",
+  "fecha": "2024-12-01T10:30:00",
+  "cliente": {
+    "nombre": "Carlos Ruiz",
+    "direccion": "Calle Nueva 456",
+    "identificacion": "11223344C"
+  },
+  "items": [
+    {
+      "descripcion": "Producto Z",
+      "cantidad": 2,
+      "precio_unitario": 150.0,
+      "subtotal": 300.0
+    },
+    {
+      "descripcion": "Servicio Y",
+      "cantidad": 1,
+      "precio_unitario": 300.0,
+      "subtotal": 300.0
+    }
+  ],
+  "total": 600.0,
+  "iva": 126.0,
+  "total_con_iva": 726.0
+}
+```
+
+#### 3. GET /facturas - Buscar facturas
+
+**Request:**
+```bash
+# Buscar por nombre de cliente
+curl -X GET "http://localhost:5000/facturas?cliente_nombre=Carlos"
+
+# Buscar por rango de fechas
+curl -X GET "http://localhost:5000/facturas?fecha_desde=2024-01-01&fecha_hasta=2024-12-31"
+
+# Buscar por monto mínimo
+curl -X GET "http://localhost:5000/facturas?monto_minimo=500"
+
+# Combinar filtros
+curl -X GET "http://localhost:5000/facturas?cliente_nombre=Carlos&monto_minimo=500&fecha_desde=2024-01-01"
+```
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "numero": "FAC-20241201-ABC123",
+    "fecha": "2024-12-01T10:30:00",
+    "cliente": {
+      "nombre": "Carlos Ruiz",
+      "direccion": "Calle Nueva 456",
+      "identificacion": "11223344C"
+    },
+    "total": 726.0
+  },
+  {
+    "id": 2,
+    "numero": "FAC-20241201-DEF456",
+    "fecha": "2024-12-01T14:20:00",
+    "cliente": {
+      "nombre": "Carlos López",
+      "direccion": "Av. Principal 789",
+      "identificacion": "99887766D"
+    },
+    "total": 550.0
+  }
+]
+```
+
+#### 4. GET /factura/{id_factura}/pdf - Descargar PDF
+
+**Request:**
+```bash
+curl -X GET http://localhost:5000/factura/1/pdf -o factura_1.pdf
+```
+
+**Response:** Archivo PDF (Content-Type: application/pdf)
+
+#### 5. DELETE /factura/{id_factura} - Eliminar factura
+
+**Request:**
+```bash
+curl -X DELETE http://localhost:5000/factura/1
+```
+
+**Response:**
+```json
+{
+  "mensaje": "Factura eliminada correctamente",
+  "id_eliminado": 1
+}
+```
+
+### 🔍 Parámetros de búsqueda disponibles
+
+Para el endpoint `GET /facturas`, puedes usar estos filtros:
+
+| Parámetro      | Tipo   | Descripción                    | Ejemplo                    |
+|----------------|--------|--------------------------------|----------------------------|
+| cliente_nombre | string | Buscar por nombre del cliente  | `?cliente_nombre=Juan`     |
+| fecha_desde    | date   | Fecha de inicio (YYYY-MM-DD)   | `?fecha_desde=2024-01-01`  |
+| fecha_hasta    | date   | Fecha de fin (YYYY-MM-DD)      | `?fecha_hasta=2024-12-31`  |
+| monto_minimo   | float  | Monto mínimo de la factura     | `?monto_minimo=100.0`      |
+| monto_maximo   | float  | Monto máximo de la factura     | `?monto_maximo=1000.0`     |
+| limit          | int    | Límite de resultados           | `?limit=10`               |
+| offset         | int    | Desplazamiento de resultados   | `?offset=20`              |
+
+### ❌ Códigos de error comunes
+
+| Código | Descripción                    | Causa típica                    |
+|--------|--------------------------------|---------------------------------|
+| 400    | Bad Request                    | JSON malformado o datos faltantes |
+| 404    | Not Found                     | Factura no encontrada           |
+| 500    | Internal Server Error          | Error interno del servidor      |
+
+**Ejemplo de error 404:**
+```json
+{
+  "error": "Factura no encontrada",
+  "mensaje": "No se encontró la factura con ID: 999"
+}
 ```
 
 ---
@@ -431,3 +706,70 @@ REACT_APP_API_URL=https://tu-api.herokuapp.com
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles. 
+
+---
+
+## ❓ Preguntas Frecuentes (FAQ)
+
+### ¿Se borran los datos de la base de datos SQLite al cerrar la aplicación?
+No. Los datos se guardan de forma persistente en el archivo `instance/eFactura.db`. Solo se pierden si borras manualmente ese archivo.
+
+### ¿Cómo puedo ver o editar la base de datos?
+Puedes usar herramientas como **DB Browser for SQLite** o **SQLiteStudio** y abrir el archivo `instance/eFactura.db`.
+
+### ¿Qué datos contiene el QR de la factura?
+El QR contiene un JSON con:
+- NIF del emisor
+- Número de factura
+- Fecha
+- Total con IVA
+- Hash único de la factura
+- URL de verificación
+
+### ¿Cómo puedo crear una factura desde PowerShell?
+Usa:
+```powershell
+Invoke-WebRequest -Uri http://localhost:5000/factura `
+  -Method POST `
+  -ContentType "application/json" `
+  -InFile "factura.json" `
+  -OutFile "factura.pdf"
+```
+
+### ¿Cómo puedo crear una factura desde Linux/Mac (Bash)?
+Usa:
+```bash
+curl -X POST http://localhost:5000/factura -H "Content-Type: application/json" -d @factura.json --output factura.pdf
+```
+
+### ¿Cómo puedo probar la API visualmente?
+- Abre el archivo `swagger.yaml` en [Swagger Editor](https://editor.swagger.io/)
+- Prueba los endpoints y consulta la documentación interactiva
+
+### ¿Qué hago si el QR me dice "Factura no encontrada"?
+- Asegúrate de que la factura existe en la base de datos
+- Comprueba el ID en la URL del QR y que no hayas borrado la base de datos
+- Puedes consultar los IDs existentes con:
+  ```bash
+  curl http://localhost:5000/facturas
+  ```
+
+### ¿Puedo personalizar el diseño del PDF o el contenido del QR?
+¡Sí! Modifica `app/services/pdf_generator.py` para cambiar el diseño, los campos del QR o la leyenda.
+
+### ¿Cómo ejecuto los tests automáticos?
+Desde la raíz del proyecto:
+```bash
+pytest
+```
+
+### ¿Cómo puedo hacer un backup de la base de datos?
+Copia el archivo `instance/eFactura.db` a otro lugar:
+```bash
+cp instance/eFactura.db backup_efactura.db
+```
+
+### ¿Puedo desplegar esto en la nube?
+Sí. Puedes desplegar el backend en Heroku, Render, Railway, etc. y el frontend en Vercel, Netlify, etc. Recuerda configurar CORS si frontend y backend están en dominios distintos.
+
+--- 

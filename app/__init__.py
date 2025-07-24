@@ -4,7 +4,6 @@ from flask_restful import Api
 import os
 
 db = SQLAlchemy()
-api = Api()
 
 def create_app():
     app = Flask(__name__)
@@ -12,15 +11,19 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     os.makedirs(app.instance_path, exist_ok=True)
     db.init_app(app)
-    api.init_app(app)
-
+    
+    # Crear nueva instancia de API para cada app
+    api = Api(app)
+    
     # Importar y registrar recursos aquí
-    from app.routes.factura_routes import FacturaResource, VerificarFacturaResource
+    from app.routes.factura_routes import FacturaResource, VerificarFacturaResource, FacturasBusquedaResource, FacturaPDFResource, FacturaDeleteResource
     api.add_resource(FacturaResource, '/factura')
     api.add_resource(VerificarFacturaResource, '/verificar/<string:id_factura>')
+    api.add_resource(FacturasBusquedaResource, '/facturas')
+    api.add_resource(FacturaPDFResource, '/factura/<int:id_factura>/pdf')
+    api.add_resource(FacturaDeleteResource, '/factura/<int:id_factura>')
 
-     # <--- AGREGA ESTO ANTES DEL RETURN
     with app.app_context():
         db.create_all()
-
+    print("Rutas registradas:", [str(r) for r in app.url_map.iter_rules()])
     return app 

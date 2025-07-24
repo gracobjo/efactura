@@ -24,19 +24,22 @@ for f in facturas:
 
 df = pd.DataFrame(data)
 
-# Total facturado por mes
-df['mes'] = pd.to_datetime(df['fecha']).dt.to_period('M')
-total_mes = df.groupby('mes')['total'].sum()
-print('Total facturado por mes:')
-print(total_mes)
+if df.empty:
+    print('No hay facturas en la base de datos.')
+else:
+    # Total facturado por mes
+    df['mes'] = pd.to_datetime(df['fecha']).dt.to_period('M')
+    total_mes = df.groupby('mes')['total'].sum()
+    print('Total facturado por mes:')
+    print(total_mes)
 
-# Facturación por cliente
-total_cliente = df.groupby('cliente')['total'].sum()
-print('\nFacturación por cliente:')
-print(total_cliente)
+    # Facturación por cliente
+    total_cliente = df.groupby('cliente')['total'].sum()
+    print('\nFacturación por cliente:')
+    print(total_cliente)
 
-# Gráfico de barras por cliente
-total_cliente.sort_values(ascending=False).plot(kind='bar', figsize=(10,5), title='Facturación por Cliente')
-plt.ylabel('Total Facturado')
-plt.tight_layout()
-plt.show() 
+    # Gráfico de barras por cliente
+    total_cliente.sort_values(ascending=False).plot(kind='bar', figsize=(10,5), title='Facturación por Cliente')
+    plt.ylabel('Total Facturado')
+    plt.tight_layout()
+    plt.show() 
