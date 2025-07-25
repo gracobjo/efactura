@@ -1,0 +1,196 @@
+@startuml Diagrama de Clases - eFactura
+
+title Diagrama de Clases - Sistema eFactura
+
+' Clases de Dominio
+class Cliente {
+  - nombre: String
+  - direccion: String
+  - identificacion: String
+  + __init__(nombre, direccion, identificacion)
+}
+
+class Item {
+  - descripcion: String
+  - cantidad: Integer
+  - precio_unitario: Float
+  + __init__(descripcion, cantidad, precio_unitario)
+  + subtotal(): Float
+}
+
+class Factura {
+  - cliente: Cliente
+  - items: List<Item>
+  - fecha: DateTime
+  - numero: String
+  + __init__(cliente, items, fecha, numero)
+  + calcular_total(): Float
+  + generar_numero_factura(): String
+  + exportar_a_pdf(ruta): void
+}
+
+' Clases de Base de Datos
+class ClienteDB {
+  + id: Integer
+  + nombre: String
+  + direccion: String
+  + identificacion: String
+  + facturas: List<FacturaDB>
+}
+
+class FacturaDB {
+  + id: Integer
+  + numero: String
+  + fecha: DateTime
+  + cliente_id: Integer
+  + cliente: ClienteDB
+  + items: List<ItemDB>
+}
+
+class ItemDB {
+  + id: Integer
+  + descripcion: String
+  + cantidad: Integer
+  + precio_unitario: Float
+  + factura_id: Integer
+  + factura: FacturaDB
+}
+
+' Clases de Servicios
+class PDFGenerator {
+  + generar_pdf(factura, id_factura): String
+  + generar_hash_factura(numero, nif, fecha): String
+}
+
+class PDFExtractor {
+  - patterns: Dict
+  + __init__()
+  + extraer_datos(pdf_path): Dict
+  + extraer_multiples_pdfs(pdf_paths): List<Dict>
+  - _extraer_texto_pdf(pdf_path): String
+  - _procesar_texto(texto): Dict
+  - _extraer_campo(texto, campo): String
+}
+
+class Storage {
+  + guardar_factura(factura): Integer
+  + obtener_factura(id_factura): Factura
+  + eliminar_factura(id_factura): void
+  + buscar_facturas(filtros): List<Factura>
+}
+
+class QRGenerator {
+  + generar_qr(datos): Image
+}
+
+' Clases de Utilidades
+class Validators {
+  + validar_cliente(cliente_data): Dict
+  + validar_items(items_data): List<Dict>
+  + validar_archivo_pdf(archivo): Boolean
+}
+
+class Formatters {
+  + formatear_euros(cantidad): String
+  + formatear_fecha(fecha): String
+  + validar_identificacion(identificacion): Boolean
+  + sanitizar_texto(texto): String
+}
+
+' Clases de Configuración
+class Config {
+  + DATABASE_URI: String
+  + UPLOAD_FOLDER: String
+  + FACTURAS_FOLDER: String
+  + IVA_PORCENTAJE: Float
+  + BASE_URL_VERIFICACION: String
+  + MAX_CONTENT_LENGTH: Integer
+  + DATE_FORMAT: String
+  + CURRENCY_FORMAT: String
+  + ALLOWED_EXTENSIONS: List<String>
+}
+
+' Clases de Excepciones
+class EFacturaException {
+  + __init__(mensaje)
+}
+
+class ValidationError {
+  + __init__(mensaje)
+}
+
+class PDFProcessingError {
+  + __init__(mensaje)
+}
+
+class StorageError {
+  + __init__(mensaje)
+}
+
+class FacturaNotFoundError {
+  + __init__(mensaje)
+}
+
+' Clases de Rutas
+class FacturaResource {
+  + post(): Response
+}
+
+class VerificarFacturaResource {
+  + get(id_factura): Response
+}
+
+class FacturasBusquedaResource {
+  + get(): Response
+  - _aplicar_filtros(query): Query
+}
+
+class FacturaPDFResource {
+  + get(id_factura): Response
+}
+
+class FacturaDeleteResource {
+  + delete(id_factura): Response
+}
+
+class MigrarFacturasResource {
+  + post(): Response
+}
+
+' Relaciones de Dominio
+Factura *-- Cliente : tiene
+Factura *-- Item : contiene
+Item --> Factura : pertenece a
+
+' Relaciones de Base de Datos
+FacturaDB *-- ClienteDB : tiene
+FacturaDB *-- ItemDB : contiene
+ItemDB --> FacturaDB : pertenece a
+
+' Herencia de Excepciones
+EFacturaException <|-- ValidationError
+EFacturaException <|-- PDFProcessingError
+EFacturaException <|-- StorageError
+EFacturaException <|-- FacturaNotFoundError
+
+' Dependencias de Servicios
+FacturaResource --> Storage : usa
+FacturaResource --> PDFGenerator : usa
+FacturaResource --> Validators : usa
+VerificarFacturaResource --> Storage : usa
+FacturasBusquedaResource --> Storage : usa
+FacturaPDFResource --> Storage : usa
+FacturaPDFResource --> PDFGenerator : usa
+FacturaDeleteResource --> Storage : usa
+MigrarFacturasResource --> PDFExtractor : usa
+MigrarFacturasResource --> Storage : usa
+
+' Dependencias de Utilidades
+PDFGenerator --> Formatters : usa
+PDFGenerator --> Config : usa
+PDFExtractor --> Config : usa
+Storage --> Config : usa
+Validators --> Config : usa
+Formatters --> Config : usa
+
+@enduml 

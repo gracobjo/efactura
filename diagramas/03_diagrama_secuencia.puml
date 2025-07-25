@@ -1,0 +1,95 @@
+@startuml Diagrama de Secuencia - Crear Factura
+
+title Diagrama de Secuencia - Crear Factura
+
+actor Usuario
+participant "FacturaResource" as FR
+participant "Validators" as VAL
+participant "Storage" as STO
+participant "PDFGenerator" as PDF
+participant "QRGenerator" as QR
+participant "Database" as DB
+
+Usuario -> FR: POST /factura (JSON)
+activate FR
+
+FR -> FR: request.get_json()
+FR -> VAL: validar_cliente(cliente_data)
+activate VAL
+VAL -> VAL: Validar campos requeridos
+VAL -> VAL: Validar formato identificación
+VAL --> FR: cliente_validado
+deactivate VAL
+
+FR -> VAL: validar_items(items_data)
+activate VAL
+VAL -> VAL: Validar cada item
+VAL -> VAL: Validar precios y cantidades
+VAL --> FR: items_validados
+deactivate VAL
+
+FR -> FR: Crear objetos Cliente e Item
+FR -> FR: Crear objeto Factura
+
+FR -> STO: guardar_factura(factura)
+activate STO
+
+STO -> DB: Buscar cliente existente
+activate DB
+DB --> STO: cliente_encontrado
+deactivate DB
+
+alt Cliente no existe
+    STO -> DB: INSERT cliente
+    activate DB
+    DB --> STO: cliente_id
+    deactivate DB
+end
+
+STO -> DB: INSERT factura
+activate DB
+DB --> STO: factura_id
+deactivate DB
+
+loop Para cada item
+    STO -> DB: INSERT item
+    activate DB
+    DB --> STO: item_guardado
+    deactivate DB
+end
+
+STO -> DB: COMMIT
+activate DB
+DB --> STO: transaccion_completada
+deactivate DB
+
+STO --> FR: id_factura
+deactivate STO
+
+FR -> PDF: generar_pdf(factura, id_factura)
+activate PDF
+
+PDF -> PDF: Calcular totales con IVA
+PDF -> PDF: Generar contenido PDF
+PDF -> QR: generar_qr(datos_factura)
+activate QR
+QR -> QR: Crear QR con datos
+QR --> PDF: imagen_qr
+deactivate QR
+
+PDF -> PDF: Insertar QR en PDF
+PDF -> PDF: Guardar archivo PDF
+PDF --> FR: ruta_pdf
+deactivate PDF
+
+FR -> FR: send_file(pdf_path)
+FR --> Usuario: PDF de factura
+deactivate FR
+
+note right of Usuario
+  El usuario recibe el PDF
+  de la factura generada
+  con QR de verificación
+end note
+
+@enduml 

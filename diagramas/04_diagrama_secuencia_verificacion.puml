@@ -1,0 +1,67 @@
+@startuml Diagrama de Secuencia - Verificar Factura
+
+title Diagrama de Secuencia - Verificar Factura
+
+actor Usuario
+participant "VerificarFacturaResource" as VFR
+participant "Storage" as STO
+participant "Database" as DB
+participant "Formatters" as FMT
+
+Usuario -> VFR: GET /verificar/{id_factura}
+activate VFR
+
+VFR -> STO: obtener_factura(id_factura)
+activate STO
+
+STO -> DB: SELECT factura WHERE id = id_factura
+activate DB
+alt Factura encontrada
+    DB --> STO: factura_data
+    deactivate DB
+    
+    STO -> STO: Reconstruir objeto Cliente
+    STO -> STO: Reconstruir objetos Item
+    STO -> STO: Reconstruir objeto Factura
+    
+    STO --> VFR: factura_completa
+    deactivate STO
+    
+    VFR -> VFR: Calcular total con IVA
+    VFR -> FMT: formatear_euros(total)
+    activate FMT
+    FMT --> VFR: total_formateado
+    deactivate FMT
+    
+    VFR -> FMT: formatear_fecha(fecha)
+    activate FMT
+    FMT --> VFR: fecha_formateada
+    deactivate FMT
+    
+    VFR -> VFR: Construir respuesta JSON
+    VFR --> Usuario: 200 OK + datos factura
+    
+else Factura no encontrada
+    DB --> STO: null
+    deactivate DB
+    
+    STO -> STO: Lanzar FacturaNotFoundError
+    STO --> VFR: FacturaNotFoundError
+    deactivate STO
+    
+    VFR -> VFR: Manejar excepción
+    VFR --> Usuario: 404 Not Found + mensaje error
+end
+
+deactivate VFR
+
+note right of Usuario
+  La respuesta incluye:
+  - Datos del cliente
+  - Lista de items
+  - Total con IVA
+  - Fecha formateada
+  - Número de factura
+end note
+
+@enduml 

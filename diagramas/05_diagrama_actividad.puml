@@ -1,0 +1,101 @@
+@startuml Diagrama de Actividad - eFactura
+
+title Diagrama de Actividad - Sistema eFactura
+
+start
+
+:Usuario accede al sistema;
+
+if (¿Qué operación desea realizar?) then (Crear Factura)
+  :Ingresar datos del cliente;
+  :Ingresar items de factura;
+  :Validar datos de entrada;
+  
+  if (¿Datos válidos?) then (Sí)
+    :Crear objetos de dominio;
+    :Guardar en base de datos;
+    :Generar PDF con QR;
+    :Retornar PDF al usuario;
+  else (No)
+    :Mostrar errores de validación;
+    stop
+  endif
+  
+elseif (Verificar Factura) then
+  :Ingresar ID de factura;
+  :Buscar factura en BD;
+  
+  if (¿Factura encontrada?) then (Sí)
+    :Reconstruir objetos;
+    :Calcular totales;
+    :Formatear datos;
+    :Retornar datos JSON;
+  else (No)
+    :Retornar error 404;
+  endif
+  
+elseif (Buscar Facturas) then
+  :Aplicar filtros opcionales;
+  :Ejecutar consulta en BD;
+  :Formatear resultados;
+  :Retornar lista JSON;
+  
+elseif (Descargar PDF) then
+  :Ingresar ID de factura;
+  :Buscar factura en BD;
+  
+  if (¿Factura encontrada?) then (Sí)
+    :Generar PDF;
+    :Retornar archivo PDF;
+  else (No)
+    :Retornar error 404;
+  endif
+  
+elseif (Eliminar Factura) then
+  :Ingresar ID de factura;
+  :Buscar factura en BD;
+  
+  if (¿Factura encontrada?) then (Sí)
+    :Eliminar de BD;
+    :Eliminar archivo PDF;
+    :Retornar confirmación;
+  else (No)
+    :Retornar error 404;
+  endif
+  
+elseif (Migrar PDFs) then
+  :Subir archivos PDF;
+  :Validar archivos;
+  
+  if (¿Archivos válidos?) then (Sí)
+    :Extraer texto de PDFs;
+    :Procesar con regex;
+    :Validar datos extraídos;
+    
+    if (¿Datos válidos?) then (Sí)
+      :Crear facturas en BD;
+      :Retornar resumen;
+    else (No)
+      :Registrar errores;
+      :Retornar errores;
+    endif
+  else (No)
+    :Retornar error de archivo;
+  endif
+  
+endif
+
+:Registrar operación en logs;
+
+stop
+
+note right
+  **Validaciones incluyen:**
+  - Campos requeridos
+  - Formato de identificación
+  - Precios y cantidades válidas
+  - Extensión de archivos
+  - Tamaño de archivos
+end note
+
+@enduml 

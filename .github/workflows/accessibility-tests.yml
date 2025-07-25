@@ -1,0 +1,135 @@
+name: 🎯 Pruebas de Accesibilidad Automatizadas
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/accessibility-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/accessibility-tests.yml'
+  workflow_dispatch: # Permite ejecución manual
+
+jobs:
+  accessibility-test:
+    name: 🔍 Test de Accesibilidad Web
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout del código
+        uses: actions/checkout@v4
+        
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: 📦 Instalar dependencias
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: 🧪 Instalar dependencias de testing
+        working-directory: ./frontend
+        run: |
+          npm install --save-dev @axe-core/react @axe-core/playwright
+          npm install --save-dev playwright
+          npx playwright install --with-deps
+          
+      - name: 🔧 Configurar Playwright
+        working-directory: ./frontend
+        run: npx playwright install-deps
+        
+      - name: 🚀 Iniciar servidor de desarrollo
+        working-directory: ./frontend
+        run: |
+          npm start &
+          sleep 30 # Esperar a que el servidor esté listo
+          
+      - name: 🎯 Ejecutar pruebas de accesibilidad con Playwright
+        working-directory: ./frontend
+        run: |
+          npx playwright test --config=playwright.config.js
+          
+      - name: 📊 Generar reporte de accesibilidad
+        working-directory: ./frontend
+        run: |
+          node scripts/generate-accessibility-report.js
+          
+      - name: 📤 Subir reporte como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-report
+          path: |
+            frontend/accessibility-report.html
+            frontend/accessibility-results.json
+            frontend/playwright-report/
+          retention-days: 30
+          
+      - name: 🐛 Comentar en PR (si es PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let report = '';
+            
+            try {
+              const results = JSON.parse(fs.readFileSync('frontend/accessibility-results.json', 'utf8'));
+              const violations = results.violations || [];
+              const passes = results.passes || [];
+              
+              report = `## 🎯 Reporte de Accesibilidad Automatizado\n\n`;
+              report += `**Fecha:** ${new Date().toLocaleString('es-ES')}\n\n`;
+              report += `### 📊 Resumen\n`;
+              report += `- ✅ **Pases:** ${passes.length}\n`;
+              report += `- ❌ **Violaciones:** ${violations.length}\n`;
+              report += `- ⚠️ **Incompletos:** ${results.incomplete?.length || 0}\n`;
+              report += `- 🔍 **Inaplicables:** ${results.inapplicable?.length || 0}\n\n`;
+              
+              if (violations.length > 0) {
+                report += `### ❌ Violaciones Encontradas\n\n`;
+                violations.forEach((violation, index) => {
+                  report += `**${index + 1}. ${violation.impact.toUpperCase()}: ${violation.description}**\n`;
+                  report += `- **Criterio WCAG:** ${violation.tags.join(', ')}\n`;
+                  report += `- **Elementos afectados:** ${violation.nodes.length}\n\n`;
+                  
+                  violation.nodes.slice(0, 3).forEach(node => {
+                    report += `  - \`${node.html.substring(0, 100)}...\`\n`;
+                  });
+                  
+                  if (violation.nodes.length > 3) {
+                    report += `  - ... y ${violation.nodes.length - 3} elementos más\n`;
+                  }
+                  report += `\n`;
+                });
+              } else {
+                report += `### ✅ ¡Excelente! No se encontraron violaciones de accesibilidad.\n\n`;
+              }
+              
+              report += `---\n`;
+              report += `*Reporte generado automáticamente por axe-core y Playwright*`;
+              
+            } catch (error) {
+              report = `## ❌ Error al generar reporte de accesibilidad\n\n`;
+              report += `Error: ${error.message}\n\n`;
+              report += `Por favor, revisa los logs del workflow para más detalles.`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+            
+      - name: 🚨 Fallar si hay violaciones críticas
+        if: failure()
+        run: |
+          echo "❌ Se encontraron problemas de accesibilidad críticos"
+          echo "Revisa el reporte generado para más detalles"
+          exit 1 

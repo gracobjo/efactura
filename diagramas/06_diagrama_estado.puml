@@ -1,0 +1,61 @@
+@startuml Diagrama de Estado - Factura
+
+title Diagrama de Estado - Ciclo de Vida de una Factura
+
+[*] --> Borrador : Crear factura
+
+state Borrador {
+  [*] --> DatosIncompletos
+  DatosIncompletos --> DatosCompletos : Completar datos
+  DatosCompletos --> DatosIncompletos : Modificar datos
+  DatosCompletos --> Validando : Enviar para validación
+  Validando --> DatosIncompletos : Errores de validación
+}
+
+Validando --> Creada : Validación exitosa
+Validando --> Rechazada : Validación fallida
+
+state Creada {
+  [*] --> Almacenada
+  Almacenada --> PDFGenerado : Generar PDF
+  PDFGenerado --> Verificable : Publicar QR
+  Verificable --> Descargada : Usuario descarga
+  Descargada --> Verificable : Nueva descarga
+}
+
+Creada --> Modificada : Actualizar datos
+Modificada --> Creada : Guardar cambios
+
+Creada --> Eliminada : Eliminar factura
+Modificada --> Eliminada : Eliminar factura
+
+state Eliminada {
+  [*] --> MarcadaEliminada
+  MarcadaEliminada --> EliminadaFisicamente : Limpieza automática
+}
+
+EliminadaFisicamente --> [*]
+
+note right of Borrador
+  **Estados del borrador:**
+  - Datos del cliente incompletos
+  - Items de factura incompletos
+  - Validaciones pendientes
+end note
+
+note right of Creada
+  **Estados de factura creada:**
+  - Almacenada en BD
+  - PDF generado
+  - QR disponible para verificación
+  - Accesible para descarga
+end note
+
+note right of Eliminada
+  **Proceso de eliminación:**
+  - Marcada como eliminada (soft delete)
+  - Eliminación física programada
+  - Limpieza de archivos PDF
+end note
+
+@enduml 

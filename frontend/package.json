@@ -16,7 +16,13 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:accessibility": "playwright test tests/accessibility.spec.js",
+    "test:accessibility:report": "node scripts/generate-accessibility-report.js",
+    "test:accessibility:ci": "playwright test tests/accessibility.spec.js --reporter=json && node scripts/generate-accessibility-report.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "eslintConfig": {
     "extends": [
@@ -36,5 +42,16 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@axe-core/react": "^4.10.2",
+    "@playwright/test": "^1.54.1",
+    "axe-core": "^4.10.3",
+    "eslint": "^8.0.0",
+    "eslint-plugin-jsx-a11y": "^6.7.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "playwright": "^1.40.0"
+  }
 }

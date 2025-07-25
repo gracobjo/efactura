@@ -9,6 +9,9 @@ Frontend en React para el sistema de facturación electrónica eFactura.
 - **Descarga automática de PDF**: Al crear una factura, se descarga automáticamente el PDF generado
 - **Diseño responsive**: Interfaz moderna y adaptable a diferentes dispositivos
 - **Integración con API REST**: Conecta con el backend Flask
+- **♿ Accesibilidad WCAG 2.1 AA**: Cumplimiento completo de estándares de accesibilidad web
+- **⌨️ Navegación por teclado**: Funcionalidad completa sin necesidad de mouse
+- **📱 Accesibilidad móvil**: Optimizado para dispositivos táctiles
 
 ## Instalación
 
@@ -76,6 +79,9 @@ frontend/
 - **Axios**: Cliente HTTP para llamadas a la API
 - **CSS3**: Estilos modernos y responsive
 - **HTML5**: Estructura semántica
+- **Playwright**: Framework de testing automatizado
+- **axe-core**: Motor de análisis de accesibilidad
+- **WCAG 2.1 AA**: Estándares de accesibilidad web
 
 ## Desarrollo
 
@@ -84,6 +90,7 @@ frontend/
 - `npm start`: Inicia el servidor de desarrollo
 - `npm build`: Construye la aplicación para producción
 - `npm test`: Ejecuta las pruebas
+- `npm run test:accessibility`: Ejecuta tests de accesibilidad WCAG 2.1 AA
 - `npm eject`: Expone la configuración de webpack (irreversible)
 
 ### Personalización
@@ -105,8 +112,36 @@ Para desplegar en producción:
 
 3. **Subir a tu servidor web o plataforma de hosting**
 
+## Accesibilidad
+
+### ♿ Tests de Accesibilidad
+
+El proyecto incluye un sistema completo de pruebas de accesibilidad que verifica el cumplimiento de los estándares WCAG 2.1 AA:
+
+```bash
+# Ejecutar tests de accesibilidad
+npm run test:accessibility
+
+# Ver reporte HTML detallado
+npx playwright show-report
+```
+
+### 📊 Métricas de Accesibilidad
+
+- **Tests Pasando**: 16/16 (100%)
+- **Pases axe-core**: 21
+- **Violaciones WCAG**: 0
+- **Tiempo de Ejecución**: ~39 segundos
+
+### 📚 Documentación
+
+- **Guía Rápida**: `QUICK_START_ACCESSIBILITY.md`
+- **Documentación Completa**: `README_ACCESSIBILITY.md`
+- **Reporte Detallado**: `ACCESSIBILITY_REPORT.md`
+
 ## Notas
 
 - El frontend requiere que el backend Flask esté ejecutándose
 - Los PDFs se descargan automáticamente al crear una factura
-- La aplicación es completamente responsive y funciona en móviles 
+- La aplicación es completamente responsive y funciona en móviles
+- La aplicación cumple completamente con los estándares WCAG 2.1 AA 

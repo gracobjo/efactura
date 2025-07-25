@@ -1,0 +1,71 @@
+@startuml Diagrama de Casos de Uso - eFactura
+
+!define RECTANGLE class
+
+title Diagrama de Casos de Uso - Sistema eFactura
+
+left to right direction
+
+actor "Usuario" as USR
+actor "Administrador" as ADM
+actor "Sistema Externo" as EXT
+
+rectangle "Sistema eFactura" {
+  usecase "Crear Factura" as UC1
+  usecase "Verificar Factura" as UC2
+  usecase "Buscar Facturas" as UC3
+  usecase "Descargar PDF" as UC4
+  usecase "Eliminar Factura" as UC5
+  usecase "Migrar Facturas PDF" as UC6
+  usecase "Gestionar Configuración" as UC7
+  usecase "Generar Reportes" as UC8
+  usecase "Validar Datos" as UC9
+  usecase "Generar QR" as UC10
+  usecase "Procesar Archivos" as UC11
+}
+
+' Relaciones Usuario
+USR --> UC1 : <<include>>
+USR --> UC2 : <<include>>
+USR --> UC3 : <<include>>
+USR --> UC4 : <<include>>
+USR --> UC5 : <<include>>
+USR --> UC6 : <<include>>
+
+' Relaciones Administrador
+ADM --> UC7 : <<include>>
+ADM --> UC8 : <<include>>
+ADM --> UC5 : <<extend>>
+
+' Relaciones Sistema
+EXT --> UC2 : <<include>>
+EXT --> UC10 : <<include>>
+
+' Dependencias internas
+UC1 ..> UC9 : <<include>>
+UC1 ..> UC10 : <<include>>
+UC6 ..> UC11 : <<include>>
+UC6 ..> UC9 : <<include>>
+UC4 ..> UC10 : <<include>>
+
+note right of UC1
+  - Validar datos del cliente
+  - Validar items de factura
+  - Generar número único
+  - Calcular totales con IVA
+end note
+
+note right of UC2
+  - Verificar existencia
+  - Validar integridad
+  - Retornar datos completos
+end note
+
+note right of UC6
+  - Extraer texto de PDF
+  - Procesar con regex
+  - Validar datos extraídos
+  - Crear facturas en BD
+end note
+
+@enduml 

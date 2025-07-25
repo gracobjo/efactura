@@ -1,0 +1,143 @@
+@startuml Diagrama de Componentes - eFactura
+
+title Diagrama de Componentes - Sistema eFactura
+
+package "Frontend" {
+  [React App] as REACT
+  [API Client] as API_CLIENT
+  [FacturaForm] as FORM
+  [FacturaList] as LIST
+}
+
+package "Backend API" {
+  [Flask App] as FLASK
+  [FacturaResource] as FACT_RES
+  [VerificarResource] as VER_RES
+  [BusquedaResource] as BUS_RES
+  [PDFResource] as PDF_RES
+  [DeleteResource] as DEL_RES
+  [MigrarResource] as MIG_RES
+}
+
+package "Servicios" {
+  [PDF Generator] as PDF_GEN
+  [PDF Extractor] as PDF_EXT
+  [Storage Service] as STORAGE
+  [QR Generator] as QR_GEN
+}
+
+package "Utilidades" {
+  [Validators] as VALID
+  [Formatters] as FORMAT
+  [Config] as CONFIG
+}
+
+package "Modelos" {
+  [Cliente] as CLIENTE
+  [Item] as ITEM
+  [Factura] as FACTURA
+  [ClienteDB] as CLIENTE_DB
+  [ItemDB] as ITEM_DB
+  [FacturaDB] as FACTURA_DB
+}
+
+package "Base de Datos" {
+  database "SQLite" as DB
+}
+
+package "Almacenamiento" {
+  folder "PDFs" as PDF_FOLDER
+  folder "Uploads" as UPLOAD_FOLDER
+}
+
+package "Excepciones" {
+  [ValidationError] as VAL_ERR
+  [PDFProcessingError] as PDF_ERR
+  [StorageError] as STOR_ERR
+  [FacturaNotFoundError] as NOT_FOUND_ERR
+}
+
+' Conexiones Frontend
+REACT --> API_CLIENT
+API_CLIENT --> FLASK
+FORM --> API_CLIENT
+LIST --> API_CLIENT
+
+' Conexiones API
+FLASK --> FACT_RES
+FLASK --> VER_RES
+FLASK --> BUS_RES
+FLASK --> PDF_RES
+FLASK --> DEL_RES
+FLASK --> MIG_RES
+
+' Conexiones Servicios
+FACT_RES --> STORAGE
+FACT_RES --> PDF_GEN
+FACT_RES --> VALID
+VER_RES --> STORAGE
+VER_RES --> FORMAT
+BUS_RES --> STORAGE
+PDF_RES --> STORAGE
+PDF_RES --> PDF_GEN
+DEL_RES --> STORAGE
+MIG_RES --> PDF_EXT
+MIG_RES --> STORAGE
+
+' Conexiones Utilidades
+PDF_GEN --> FORMAT
+PDF_GEN --> CONFIG
+PDF_GEN --> QR_GEN
+PDF_EXT --> CONFIG
+STORAGE --> CONFIG
+VALID --> CONFIG
+FORMAT --> CONFIG
+
+' Conexiones Modelos
+STORAGE --> CLIENTE_DB
+STORAGE --> ITEM_DB
+STORAGE --> FACTURA_DB
+FACT_RES --> CLIENTE
+FACT_RES --> ITEM
+FACT_RES --> FACTURA
+
+' Conexiones Base de Datos
+CLIENTE_DB --> DB
+ITEM_DB --> DB
+FACTURA_DB --> DB
+
+' Conexiones Almacenamiento
+PDF_GEN --> PDF_FOLDER
+PDF_EXT --> UPLOAD_FOLDER
+
+' Conexiones Excepciones
+VALID --> VAL_ERR
+PDF_EXT --> PDF_ERR
+STORAGE --> STOR_ERR
+STORAGE --> NOT_FOUND_ERR
+
+note top of FLASK
+  **Flask Application**
+  - Configuración centralizada
+  - Manejo de errores
+  - CORS habilitado
+  - Logging configurado
+end note
+
+note right of STORAGE
+  **Storage Service**
+  - Gestión de transacciones
+  - Mapeo objeto-relacional
+  - Manejo de errores de BD
+  - Búsquedas optimizadas
+end note
+
+note bottom of PDF_GEN
+  **PDF Generator**
+  - Generación de PDFs
+  - Integración de QR
+  - Cálculo de totales
+  - Formato profesional
+end note
+
+@enduml 

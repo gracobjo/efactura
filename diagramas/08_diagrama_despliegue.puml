@@ -1,0 +1,126 @@
+@startuml Diagrama de Despliegue - eFactura
+
+title Diagrama de Despliegue - Sistema eFactura
+
+node "Cliente" {
+  [Navegador Web] as BROWSER
+  [Dispositivo Móvil] as MOBILE
+}
+
+cloud "Internet" {
+  [CDN] as CDN
+}
+
+node "Servidor Web" {
+  [Nginx] as NGINX
+  [Load Balancer] as LB
+}
+
+node "Servidor de Aplicación" {
+  [Gunicorn] as GUNICORN
+  [Flask App] as FLASK_APP
+  [Python 3.11] as PYTHON
+}
+
+node "Servidor de Base de Datos" {
+  database "SQLite" as SQLITE
+  database "PostgreSQL" as POSTGRES
+}
+
+node "Servidor de Archivos" {
+  folder "/var/www/facturas" as FACTURAS_FOLDER
+  folder "/var/www/uploads" as UPLOADS_FOLDER
+  folder "/var/logs" as LOGS_FOLDER
+}
+
+node "Servidor de Desarrollo" {
+  [Flask Development Server] as DEV_SERVER
+  [SQLite Development] as DEV_DB
+  [Local Files] as LOCAL_FILES
+}
+
+node "CI/CD Pipeline" {
+  [GitHub Actions] as GITHUB_ACTIONS
+  [Docker Registry] as DOCKER_REG
+  [Test Environment] as TEST_ENV
+}
+
+' Conexiones Cliente
+BROWSER --> CDN : HTTPS
+MOBILE --> CDN : HTTPS
+
+' Conexiones Internet
+CDN --> NGINX : HTTPS/80
+CDN --> LB : HTTPS/443
+
+' Conexiones Servidor Web
+NGINX --> GUNICORN : Proxy
+LB --> GUNICORN : Load Balance
+
+' Conexiones Servidor de Aplicación
+GUNICORN --> FLASK_APP : WSGI
+FLASK_APP --> PYTHON : Runtime
+FLASK_APP --> SQLITE : Development
+FLASK_APP --> POSTGRES : Production
+
+' Conexiones Base de Datos
+FLASK_APP --> FACTURAS_FOLDER : Read/Write PDFs
+FLASK_APP --> UPLOADS_FOLDER : Read/Write Uploads
+FLASK_APP --> LOGS_FOLDER : Write Logs
+
+' Conexiones Desarrollo
+DEV_SERVER --> DEV_DB : SQLite
+DEV_SERVER --> LOCAL_FILES : Local Storage
+
+' Conexiones CI/CD
+GITHUB_ACTIONS --> TEST_ENV : Deploy Tests
+GITHUB_ACTIONS --> DOCKER_REG : Push Images
+GITHUB_ACTIONS --> NGINX : Deploy Production
+
+note top of BROWSER
+  **Cliente Web**
+  - React SPA
+  - Responsive Design
+  - PWA capabilities
+end note
+
+note right of NGINX
+  **Nginx**
+  - Reverse Proxy
+  - SSL Termination
+  - Static Files
+  - Rate Limiting
+end note
+
+note bottom of GUNICORN
+  **Gunicorn**
+  - WSGI Server
+  - Multiple Workers
+  - Process Management
+  - Health Checks
+end note
+
+note left of SQLITE
+  **SQLite (Dev)**
+  - Archivo único
+  - Sin configuración
+  - Ideal desarrollo
+end note
+
+note left of POSTGRES
+  **PostgreSQL (Prod)**
+  - Alta concurrencia
+  - ACID compliance
+  - Backup automático
+  - Escalabilidad
+end note
+
+note bottom of GITHUB_ACTIONS
+  **CI/CD Pipeline**
+  - Tests automáticos
+  - Code quality checks
+  - Security scanning
+  - Auto deployment
+end note
+
+@enduml 
