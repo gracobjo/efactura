@@ -66,7 +66,7 @@ jobs:
         fail_ci_if_error: false
         
     - name: Upload coverage reports to GitHub
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-reports
         path: htmlcov/
@@ -99,7 +99,7 @@ jobs:
         safety check --json --output safety-report.json || true
         
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-reports
         path: |
@@ -141,7 +141,7 @@ jobs:
         cp .gitignore dist/
         
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: efactura-build
         path: dist/
