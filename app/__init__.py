@@ -6,21 +6,34 @@ import os
 
 db = SQLAlchemy()
 
-def create_app():
+def create_app(config_name='default'):
+    """Factory function para crear la aplicación Flask"""
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'eFactura.db')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    os.makedirs(app.instance_path, exist_ok=True)
+    
+    # Cargar configuración
+    from app.config import config
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+    
+    # Inicializar extensiones
     db.init_app(app)
     
     # Configurar CORS
     CORS(app, resources={r"/*": {"origins": "*"}})
     
-    # Crear nueva instancia de API para cada app
+    # Crear API
     api = Api(app)
     
-    # Importar y registrar recursos aquí
-    from app.routes.factura_routes import FacturaResource, VerificarFacturaResource, FacturasBusquedaResource, FacturaPDFResource, FacturaDeleteResource, MigrarFacturasResource
+    # Registrar rutas
+    from app.routes.factura_routes import (
+        FacturaResource, 
+        VerificarFacturaResource, 
+        FacturasBusquedaResource, 
+        FacturaPDFResource, 
+        FacturaDeleteResource, 
+        MigrarFacturasResource
+    )
+    
     api.add_resource(FacturaResource, '/factura')
     api.add_resource(VerificarFacturaResource, '/verificar/<string:id_factura>')
     api.add_resource(FacturasBusquedaResource, '/facturas')
@@ -28,7 +41,8 @@ def create_app():
     api.add_resource(FacturaDeleteResource, '/factura/<int:id_factura>')
     api.add_resource(MigrarFacturasResource, '/migrar-facturas')
 
+    # Crear tablas de base de datos
     with app.app_context():
         db.create_all()
-    print("Rutas registradas:", [str(r) for r in app.url_map.iter_rules()])
+    
     return app 

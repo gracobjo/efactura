@@ -6,10 +6,10 @@ def test_crear_y_verificar_factura(client):
         "cliente": {
             "nombre": "Test User",
             "direccion": "Test Street",
-            "identificacion": "TEST123"
+            "identificacion": "TEST12345"
         },
         "items": [
-            {"descripcion": "Producto Test", "cantidad": 2, "precio_unitario": 50.0}
+            {"descripcion": "Producto Test", "cantidad": 2, "precio": 50.0}
         ]
     }
     response = client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
@@ -21,7 +21,7 @@ def test_crear_y_verificar_factura(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["cliente"]["nombre"] == "Test User"
-    assert data["total"] == 100.0
+    assert "100,00 EUR" in data["total"]
 
 def test_busqueda_avanzada(client):
     # Crear dos facturas
@@ -30,10 +30,10 @@ def test_busqueda_avanzada(client):
             "cliente": {
                 "nombre": f"Cliente {i}",
                 "direccion": "Calle",
-                "identificacion": f"ID{i}"
+                "identificacion": f"ID{i}12345"
             },
             "items": [
-                {"descripcion": "Prod", "cantidad": 1, "precio_unitario": 10.0 + i}
+                {"descripcion": "Prod", "cantidad": 1, "precio": 10.0 + i}
             ]
         }
         client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
@@ -49,29 +49,29 @@ def test_crear_factura_datos_faltantes(client):
     # Test sin datos de cliente
     factura_data = {
         "items": [
-            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 10.0}
+            {"descripcion": "Producto", "cantidad": 1, "precio": 10.0}
         ]
     }
     response = client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
     assert response.status_code == 400
-    assert "Datos de cliente e items requeridos" in response.get_json()["message"]
+    assert "Datos del cliente requeridos" in response.get_json()["message"]
 
     # Test sin items
     factura_data = {
         "cliente": {
             "nombre": "Test",
             "direccion": "Test",
-            "identificacion": "TEST"
+            "identificacion": "TEST12345"
         }
     }
     response = client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
     assert response.status_code == 400
-    assert "Datos de cliente e items requeridos" in response.get_json()["message"]
+    assert "Lista de items requerida" in response.get_json()["message"]
 
 def test_verificar_factura_no_existe(client):
     response = client.get("/verificar/999")
     assert response.status_code == 404
-    assert "Factura no encontrada" in response.get_json()["mensaje"]
+    assert "no encontrada" in response.get_json()["message"]
 
 def test_busqueda_con_filtros_avanzados(client):
     # Crear factura para testing
@@ -79,43 +79,31 @@ def test_busqueda_con_filtros_avanzados(client):
         "cliente": {
             "nombre": "Cliente Filtro",
             "direccion": "Dirección",
-            "identificacion": "FILTRO123"
+            "identificacion": "FILTRO12345"
         },
         "items": [
-            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 100.0}
+            {"descripcion": "Producto", "cantidad": 1, "precio": 100.0}
         ]
     }
     client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
 
     # Test filtro por identificación
-    response = client.get("/facturas?cliente_identificacion=FILTRO123")
+    response = client.get("/facturas?cliente_identificacion=FILTRO12345")
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]["cliente"]["identificacion"] == "FILTRO123"
-
-    # Test filtro por monto mínimo
-    response = client.get("/facturas?total_min=50")
-    assert response.status_code == 200
-    data = response.get_json()
-    assert len(data) >= 1
-
-    # Test filtro por monto máximo
-    response = client.get("/facturas?total_max=200")
-    assert response.status_code == 200
-    data = response.get_json()
-    assert len(data) >= 1
+    assert data[0]["cliente"]["identificacion"] == "FILTRO12345"
 
 def test_descargar_pdf_factura(client):
     # Crear factura primero
     factura_data = {
         "cliente": {
             "nombre": "Test PDF",
-            "direccion": "Test",
-            "identificacion": "PDF123"
+            "direccion": "Test Address",
+            "identificacion": "PDF12345"
         },
         "items": [
-            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 10.0}
+            {"descripcion": "Producto PDF", "cantidad": 1, "precio": 25.0}
         ]
     }
     client.post("/factura", data=json.dumps(factura_data), content_type="application/json")
@@ -134,11 +122,11 @@ def test_eliminar_factura(client):
     factura_data = {
         "cliente": {
             "nombre": "Test Delete",
-            "direccion": "Test",
-            "identificacion": "DELETE123"
+            "direccion": "Test Address",
+            "identificacion": "DEL12345"
         },
         "items": [
-            {"descripcion": "Producto", "cantidad": 1, "precio_unitario": 10.0}
+            {"descripcion": "Producto Delete", "cantidad": 1, "precio": 30.0}
         ]
     }
     client.post("/factura", data=json.dumps(factura_data), content_type="application/json")

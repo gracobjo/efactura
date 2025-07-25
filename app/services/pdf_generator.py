@@ -4,39 +4,31 @@ import os
 import tempfile
 import json
 import hashlib
-
-IVA_PORCENTAJE = 0.21  # 21% de IVA
-
-BASE_URL_VERIFICACION = "http://localhost:5000/verificar/"  # Cambia según despliegue
-
-
-def formatear_euros(valor):
-    """Formatea un valor numérico en formato español con símbolo de euro"""
-    return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " EUR"
-
+from app.config import Config
+from app.utils.formatters import formatear_euros, formatear_fecha
 
 def generar_hash_factura(numero, nif, fecha):
-    # Hash simple usando SHA256 de los campos clave
+    """Genera hash de verificación para la factura"""
     hash_input = f"{numero}|{nif}|{fecha}"
-    return hashlib.sha256(hash_input.encode('utf-8')).hexdigest()[:16]  # 16 chars
-
+    return hashlib.sha256(hash_input.encode('utf-8')).hexdigest()[:16]
 
 def generar_pdf(factura, id_factura):
-    # Usar una ruta más robusta para el entorno de test
+    """Genera PDF de la factura con QR de verificación"""
+    # Determinar directorio según entorno
     if os.environ.get('TESTING'):
-        pdf_dir = tempfile.gettempdir()  # Carpeta temporal del sistema
+        pdf_dir = tempfile.gettempdir()
     else:
-        pdf_dir = os.path.join(os.getcwd(), 'instance', 'facturas')
+        pdf_dir = Config.FACTURAS_FOLDER
     
     os.makedirs(pdf_dir, exist_ok=True)
     pdf_path = os.path.join(pdf_dir, f"factura_{id_factura}.pdf")
 
-    # Datos clave para el QR y la leyenda
+    # Datos para el QR
     numero = factura.numero
-    fecha = factura.fecha.strftime('%Y-%m-%d')
-    total = factura.calcular_total() * (1 + IVA_PORCENTAJE)
+    fecha = formatear_fecha(factura.fecha)
+    total = factura.calcular_total() * (1 + Config.IVA_PORCENTAJE)
     nif = factura.cliente.identificacion
-    url_verificacion = f"{BASE_URL_VERIFICACION}{id_factura}"
+    url_verificacion = f"{Config.BASE_URL_VERIFICACION}{id_factura}"
     hash_factura = generar_hash_factura(numero, nif, fecha)
 
     # Contenido del QR según BOE-A-2023-24840
@@ -55,7 +47,7 @@ def generar_pdf(factura, id_factura):
     pdf.add_page()
     pdf.set_font("Arial", size=12)
 
-    # Datos del cliente
+    # Encabezado
     pdf.cell(0, 10, f"Factura N°: {factura.numero}", ln=True)
     pdf.cell(0, 10, f"Fecha: {fecha}", ln=True)
     pdf.cell(0, 10, f"Cliente: {factura.cliente.nombre}", ln=True)
@@ -70,6 +62,7 @@ def generar_pdf(factura, id_factura):
     pdf.cell(40, 10, "Precio Unitario", 1)
     pdf.cell(40, 10, "Subtotal", 1, ln=True)
     pdf.set_font("Arial", size=12)
+    
     for item in factura.items:
         pdf.cell(80, 10, str(item.descripcion), 1)
         pdf.cell(30, 10, str(item.cantidad), 1)
@@ -77,8 +70,10 @@ def generar_pdf(factura, id_factura):
         pdf.cell(40, 10, formatear_euros(item.subtotal()), 1, ln=True)
 
     pdf.ln(5)
+    
+    # Cálculo de totales
     total_sin_iva = factura.calcular_total()
-    iva = total_sin_iva * IVA_PORCENTAJE
+    iva = total_sin_iva * Config.IVA_PORCENTAJE
     total_con_iva = total_sin_iva + iva
 
     # Desglose de totales
@@ -88,7 +83,7 @@ def generar_pdf(factura, id_factura):
     pdf.cell(0, 10, formatear_euros(total_sin_iva), ln=True)
 
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(60, 10, f"IVA ({int(IVA_PORCENTAJE*100)}%):", 0)
+    pdf.cell(60, 10, f"IVA ({int(Config.IVA_PORCENTAJE*100)}%):", 0)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, formatear_euros(iva), ln=True)
 
@@ -98,20 +93,19 @@ def generar_pdf(factura, id_factura):
     pdf.cell(0, 10, formatear_euros(total_con_iva), ln=True)
 
     pdf.ln(10)
-    # Leyenda de factura verificable
+    
+    # Leyenda de verificación
     pdf.set_font("Arial", 'I', 11)
     pdf.set_text_color(80, 80, 80)
     pdf.cell(0, 10, f"Factura verificable en {url_verificacion}", ln=True)
     pdf.set_text_color(0, 0, 0)
 
-    # Generar código QR
+    # Generar e insertar QR
     qr = qrcode.make(qr_content)
     qr_path = os.path.join(pdf_dir, f"qr_{id_factura}.png")
     qr.save(qr_path)
-
-    # Insertar QR en el PDF
     pdf.image(qr_path, x=160, y=10, w=40)
 
     pdf.output(pdf_path)
-    os.remove(qr_path)
+    os.remove(qr_path)  # Limpiar archivo temporal
     return pdf_path 

@@ -11,14 +11,12 @@ def app():
     if 'app' in globals():
         del globals()['app']
     
-    app = create_app()
-    app.config.update({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
-        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-    })
+    # Usar configuración de testing
+    app = create_app('testing')
+    
     # Establecer variable de entorno para testing
     os.environ['TESTING'] = 'True'
+    
     with app.app_context():
         db.create_all()
         yield app

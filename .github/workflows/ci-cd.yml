@@ -35,14 +35,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest-cov flake8 black
+        pip install pytest-cov flake8 black bandit
+        
+    - name: Create necessary directories
+      run: |
+        mkdir -p instance/uploads
+        mkdir -p instance/facturas
         
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
         
     - name: Format check with black
       run: |
@@ -127,11 +132,12 @@ jobs:
         cp -r tests/ dist/
         cp requirements.txt dist/
         cp run.py dist/
-        cp config.py dist/
-        cp poblar_db.py dist/
+        cp migrate_db.py dist/
         cp analisis_facturas.py dist/
         cp demo_colab.ipynb dist/
         cp README.md dist/
+        cp pyproject.toml dist/
+        cp env.example dist/
         cp .gitignore dist/
         
     - name: Upload build artifact
