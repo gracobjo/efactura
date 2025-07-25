@@ -18,6 +18,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:accessibility": "playwright test tests/accessibility.spec.js",
+    "verify-github": "node scripts/verify-github-workflow.js",
     "test:accessibility:report": "node scripts/generate-accessibility-report.js",
     "test:accessibility:ci": "playwright test tests/accessibility.spec.js --reporter=json && node scripts/generate-accessibility-report.js",
     "test:e2e": "playwright test",

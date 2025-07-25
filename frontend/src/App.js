@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import FacturaForm from './components/FacturaForm';
 import FacturaVerificar from './components/FacturaVerificar';
 import FacturaMigrar from './components/FacturaMigrar';
@@ -13,16 +13,18 @@ function App() {
     const currentIndex = tabs.indexOf(activeTab);
     
     switch (e.key) {
-      case 'ArrowRight':
+      case 'ArrowRight': {
         e.preventDefault();
         const nextIndex = (currentIndex + 1) % tabs.length;
         setActiveTab(tabs[nextIndex]);
         break;
-      case 'ArrowLeft':
+      }
+      case 'ArrowLeft': {
         e.preventDefault();
         const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
         setActiveTab(tabs[prevIndex]);
         break;
+      }
       case 'Home':
         e.preventDefault();
         setActiveTab(tabs[0]);
@@ -43,7 +45,7 @@ function App() {
         <h1>eFactura - Sistema de Facturación Electrónica</h1>
       </header>
       
-      <nav className="nav-tabs" role="tablist" aria-label="Navegación principal de eFactura" onKeyDown={handleKeyDown}>
+      <div className="nav-tabs" role="tablist" aria-label="Navegación principal de eFactura" onKeyDown={handleKeyDown} tabIndex={0}>
         <button 
           className={`tab ${activeTab === 'crear' ? 'active' : ''}`}
           onClick={() => setActiveTab('crear')}
@@ -77,7 +79,7 @@ function App() {
         >
           Migrar PDFs
         </button>
-      </nav>
+      </div>
 
       <main className="main-content" role="main">
         <div 
