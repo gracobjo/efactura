@@ -8,11 +8,14 @@ class Cliente:
 class Item:
     def __init__(self, descripcion, cantidad, precio_unitario):
         self.descripcion = descripcion
-        self.cantidad = cantidad
-        self.precio_unitario = precio_unitario
+        self.cantidad = cantidad or 0
+        self.precio_unitario = precio_unitario or 0.0
 
     def subtotal(self):
-        return self.cantidad * self.precio_unitario
+        # Manejar valores None o nulos
+        cantidad = self.cantidad or 0
+        precio = self.precio_unitario or 0.0
+        return cantidad * precio
 
 
 import uuid
@@ -26,7 +29,18 @@ class Factura:
         self.numero = numero or self.generar_numero_factura()
 
     def calcular_total(self):
-        return sum(item.subtotal() for item in self.items)
+        # Manejar casos donde items puede ser None o contener valores nulos
+        if not self.items:
+            return 0.0
+        
+        total = 0.0
+        for item in self.items:
+            if item and hasattr(item, 'subtotal'):
+                subtotal = item.subtotal()
+                if subtotal is not None:
+                    total += subtotal
+        
+        return total
 
     def generar_numero_factura(self):
         # Genera un número único usando UUID y fecha

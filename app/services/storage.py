@@ -111,6 +111,41 @@ def obtener_factura(id_factura):
     except Exception as e:
         raise StorageError(f"Error obteniendo factura: {e}")
 
+def listar_facturas():
+    """Lista todas las facturas de la base de datos"""
+    try:
+        facturas_db = FacturaDB.query.options(
+            joinedload(FacturaDB.cliente),
+            joinedload(FacturaDB.items)
+        ).all()
+        
+        facturas = []
+        for factura_db in facturas_db:
+            # Reconstruir objetos de dominio
+            cliente = Cliente(
+                nombre=factura_db.cliente.nombre,
+                direccion=factura_db.cliente.direccion,
+                identificacion=factura_db.cliente.identificacion
+            )
+            
+            items = [
+                Item(
+                    descripcion=item.descripcion,
+                    cantidad=item.cantidad,
+                    precio_unitario=item.precio_unitario
+                ) for item in factura_db.items
+            ]
+            
+            factura = Factura(cliente, items)
+            factura.numero = factura_db.numero
+            factura.fecha = factura_db.fecha
+            facturas.append(factura)
+        
+        return facturas
+        
+    except Exception as e:
+        raise StorageError(f"Error listando facturas: {e}")
+
 def eliminar_factura(id_factura):
     """Elimina una factura de la base de datos"""
     try:

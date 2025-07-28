@@ -1,364 +1,274 @@
-# eFactura - Sistema de Facturación Electrónica
+# 🧾 eFactura - Sistema de Facturación Electrónica
 
-Sistema completo de facturación electrónica con generación de PDFs, códigos QR de verificación y migración de facturas existentes.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com)
+[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 🚀 Características
+## 📋 Descripción
 
-- **Generación de facturas PDF** con códigos QR de verificación
-- **Migración de facturas PDF existentes** a la base de datos
-- **API REST completa** para gestión de facturas
-- **Búsqueda avanzada** con múltiples filtros
-- **Validación robusta** de datos de entrada
-- **Manejo de errores centralizado**
-- **Configuración modular** por entornos
-- **Código limpio y mantenible**
-- **Documentación UML completa**
+eFactura es un sistema completo de facturación electrónica que incluye:
+
+- **Backend API REST** (Flask/Python)
+- **Frontend React** con interfaz moderna
+- **API para aplicaciones externas** (Contasimple, Sage, etc.)
+- **Validación y procesamiento** de facturas
+- **Cálculo automático** de totales
+- **Tests de accesibilidad** (WCAG 2.1 AA)
+
+## 🚀 Funcionalidades Principales
+
+### **Core System**
+- ✅ Gestión completa de facturas (CRUD)
+- ✅ Validación automática de datos
+- ✅ Cálculo de totales y subtotales
+- ✅ Generación de números de factura únicos
+- ✅ Base de datos SQLite con SQLAlchemy
+
+### **API para Aplicaciones Externas**
+- ✅ **Procesamiento temporal** sin afectar la BD
+- ✅ **Validación de datos** antes de procesar
+- ✅ **Cálculo de totales** para presupuestos
+- ✅ **Migración de datos** desde otros sistemas
+- ✅ **Integración** con Contasimple, Sage, etc.
+
+### **Frontend**
+- ✅ Interfaz React moderna y responsive
+- ✅ Navegación por teclado (accesibilidad)
+- ✅ Tests de accesibilidad automatizados
+- ✅ Simulador de aplicación externa
+
+## 🏗️ Arquitectura
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend API   │    │   External Apps │
+│   (React)       │◄──►│   (Flask)       │◄──►│   (Contasimple) │
+│                 │    │                 │    │   (Sage, etc.)  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │   Database      │
+                       │   (SQLite)      │
+                       └─────────────────┘
+```
 
 ## 📁 Estructura del Proyecto
 
 ```
 efactura/
-├── app/
-│   ├── __init__.py              # Factory de la aplicación Flask
-│   ├── config.py                # Configuración centralizada
-│   ├── exceptions.py            # Excepciones personalizadas
-│   ├── models/
-│   │   └── factura.py           # Modelos de dominio
-│   ├── routes/
-│   │   └── factura_routes.py    # Endpoints de la API
-│   ├── services/
-│   │   ├── storage.py           # Capa de persistencia
-│   │   ├── pdf_generator.py     # Generación de PDFs
-│   │   └── pdf_extractor.py     # Extracción de datos de PDFs
-│   └── utils/
-│       ├── formatters.py        # Utilidades de formateo
-│       └── validators.py        # Validación de datos
-├── diagramas/                   # Diagramas UML del sistema
-│   ├── 01_diagrama_casos_uso.puml
-│   ├── 02_diagrama_clases.puml
-│   ├── 03_diagrama_secuencia.puml
-│   ├── 04_diagrama_secuencia_verificacion.puml
-│   ├── 05_diagrama_actividad.puml
-│   ├── 06_diagrama_estado.puml
-│   ├── 07_diagrama_componentes.puml
-│   ├── 08_diagrama_despliegue.puml
-│   └── README.md                # Documentación de diagramas
-├── tests/                       # Tests unitarios e integración
-├── frontend/                    # Interfaz web (React)
-├── requirements.txt             # Dependencias Python
-├── run.py                       # Punto de entrada
-├── migrate_db.py                # Script de migración de BD
-├── env.example                  # Variables de entorno de ejemplo
-├── pyproject.toml               # Configuración de herramientas
-└── README.md                    # Este archivo
+├── 📂 app/                    # Backend Flask
+│   ├── 📂 models/            # Modelos de dominio
+│   ├── 📂 services/          # Lógica de negocio
+│   └── 📂 utils/             # Utilidades y validadores
+├── 📂 frontend/              # Frontend React
+│   ├── 📂 public/           # Archivos estáticos
+│   │   └── simulator.html   # Simulador externo
+│   ├── 📂 src/              # Código React
+│   └── 📂 tests/            # Tests de accesibilidad
+├── 📄 app.py                 # Punto de entrada del API
+├── 📄 swagger.yaml          # Documentación OpenAPI
+├── 📄 ejemplo_aplicacion_externa.py  # Ejemplo de integración
+└── 📄 README.md             # Esta documentación
 ```
 
-## 📊 Diagramas UML
+## 🚀 Instalación y Configuración
 
-El proyecto incluye una documentación UML completa en el directorio `diagramas/`:
+### **Prerrequisitos**
+- Python 3.8+
+- Node.js 16+
+- npm o yarn
 
-### Diagramas Esenciales
-- **Diagrama de Casos de Uso**: Interacciones entre usuarios y sistema
-- **Diagrama de Clases**: Estructura de clases y relaciones
-- **Diagrama de Secuencia**: Flujo de interacciones (Crear/Verificar Factura)
-- **Diagrama de Actividad**: Flujo de trabajo del sistema
-
-### Diagramas Opcionales
-- **Diagrama de Estado**: Estados de una factura
-- **Diagrama de Componentes**: Arquitectura de componentes
-- **Diagrama de Despliegue**: Infraestructura y despliegue
-
-### Visualizar Diagramas
+### **1. Clonar el repositorio**
 ```bash
-# Opción 1: PlantUML Online
-# Ve a http://www.plantuml.com/plantuml/uml/ y pega el contenido .puml
-
-# Opción 2: PlantUML Local
-java -jar plantuml.jar diagramas/*.puml
-
-# Opción 3: VS Code con extensión PlantUML
-# Instala "PlantUML" y usa Ctrl+Shift+P > "PlantUML: Preview"
+git clone https://github.com/tu-usuario/efactura.git
+cd efactura
 ```
 
-## 🛠️ Instalación
+### **2. Configurar Backend**
+```bash
+# Crear entorno virtual
+python -m venv backend_venv
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone <url-del-repositorio>
-   cd efactura
-   ```
+# Activar entorno (Windows)
+backend_venv\Scripts\Activate.ps1
 
-2. **Crear entorno virtual:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
-   ```
+# Activar entorno (Linux/Mac)
+source backend_venv/bin/activate
 
-3. **Instalar dependencias:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Instalar dependencias
+pip install -r requirements.txt
+```
 
-4. **Configurar variables de entorno:**
-   ```bash
-   # Copiar archivo de ejemplo
-   cp env.example .env
-   
-   # Editar variables según entorno
-   export FLASK_ENV=development
-   export FLASK_APP=run.py
-   ```
+### **3. Configurar Frontend**
+```bash
+cd frontend
+npm install
+```
 
-5. **Migrar base de datos (si es necesario):**
-   ```bash
-   python migrate_db.py
-   ```
+### **4. Inicializar Base de Datos**
+```bash
+python -c "from app import create_app; app = create_app(); app.app_context().push(); from app import db; db.create_all()"
+```
 
-6. **Ejecutar la aplicación:**
-   ```bash
-   python run.py
-   ```
+## 🎯 Uso
 
-## 📚 API Endpoints
+### **Iniciar Backend**
+```bash
+python app.py
+```
+**URLs disponibles:**
+- API: http://localhost:5000
+- Health: http://localhost:5000/health
+- Swagger: http://localhost:5000/swagger
 
-### Crear Factura
-```http
-POST /factura
-Content-Type: application/json
+### **Iniciar Frontend**
+```bash
+cd frontend
+npm start
+```
+**URL:** http://localhost:3000
 
-{
-  "cliente": {
-    "nombre": "Juan Pérez",
-    "direccion": "Calle Mayor 123",
-    "identificacion": "12345678A"
-  },
-  "items": [
-    {
-      "descripcion": "Servicio de consultoría",
-      "cantidad": 2,
-      "precio": 100.00
-    }
-  ]
+### **Ejecutar Tests de Accesibilidad**
+```bash
+cd frontend
+npm run test:accessibility
+```
+
+## 🔗 API Endpoints
+
+### **Core Endpoints**
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/` | Información del API |
+| `GET` | `/health` | Estado de salud |
+| `GET` | `/api/facturas` | Listar facturas |
+| `POST` | `/api/facturas` | Crear factura |
+
+### **External API Endpoints**
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/api/procesar-factura` | Procesar sin guardar |
+| `POST` | `/api/validar-factura` | Validar datos |
+| `POST` | `/api/calcular-total` | Calcular totales |
+
+## 🔧 Ejemplos de Uso
+
+### **Procesar Factura Externa**
+```python
+import requests
+
+factura_externa = {
+    "cliente": {
+        "nombre": "Empresa Externa S.L.",
+        "direccion": "Calle Externa 123, 28001 Madrid",
+        "identificacion": "B12345678"
+    },
+    "items": [
+        {
+            "descripcion": "Servicio de Consultoría",
+            "cantidad": 10,
+            "precio": 150.00
+        }
+    ]
 }
+
+response = requests.post(
+    "http://localhost:5000/api/procesar-factura",
+    json=factura_externa
+)
+
+resultado = response.json()
+print(f"Factura procesada: {resultado['numero']}")
+print(f"Total: €{resultado['total']:.2f}")
 ```
 
-**Respuesta:** Archivo PDF de la factura generada
+### **Validar Factura**
+```python
+response = requests.post(
+    "http://localhost:5000/api/validar-factura",
+    json=factura_data
+)
 
-### Verificar Factura
-```http
-GET /verificar/{id_factura}
+if response.status_code == 200:
+    print("✅ Factura válida")
+else:
+    print("❌ Factura inválida")
 ```
 
-**Respuesta:**
-```json
-{
-  "id": 1,
-  "numero": "FAC-2024-001",
-  "fecha": "2024-01-15",
-  "cliente": {
-    "nombre": "Juan Pérez",
-    "direccion": "Calle Mayor 123",
-    "identificacion": "12345678A"
-  },
-  "items": [...],
-  "total": "242,00 EUR"
-}
+### **Calcular Total**
+```python
+items = [
+    {"descripcion": "Producto A", "cantidad": 5, "precio": 25.50},
+    {"descripcion": "Servicio B", "cantidad": 2, "precio": 100.00}
+]
+
+response = requests.post(
+    "http://localhost:5000/api/calcular-total",
+    json={"items": items}
+)
+
+resultado = response.json()
+print(f"Total: €{resultado['total']:.2f}")
 ```
 
-### Buscar Facturas
-```http
-GET /facturas?cliente_nombre=Juan&fecha_desde=2024-01-01&fecha_hasta=2024-12-31
-```
+## 🎯 Casos de Uso
 
-**Parámetros opcionales:**
-- `cliente_nombre`: Filtrar por nombre del cliente
-- `fecha_desde`: Fecha de inicio (YYYY-MM-DD)
-- `fecha_hasta`: Fecha de fin (YYYY-MM-DD)
-- `identificacion`: Filtrar por identificación del cliente
+### **Migración desde Contasimple**
+1. Exportar facturas desde Contasimple
+2. Validar con `/api/validar-factura`
+3. Procesar con `/api/procesar-factura`
+4. Guardar en sistema propio
 
-### Descargar PDF
-```http
-GET /factura/{id_factura}/pdf
-```
+### **Integración con Sage**
+1. Calcular totales de presupuestos
+2. Validar estructura de datos
+3. Procesar facturas temporalmente
 
-### Eliminar Factura
-```http
-DELETE /factura/{id_factura}
-```
+### **Aplicación Personalizada**
+1. Usar validaciones de eFactura
+2. Calcular totales automáticamente
+3. Integrar con sistemas propios
 
-### Migrar Facturas PDF
-```http
-POST /migrar-facturas
-Content-Type: multipart/form-data
+## 🔒 Seguridad
 
-files: [archivos PDF]
-```
+- ✅ **CORS configurado** para desarrollo
+- ✅ **Validación de datos** en todos los endpoints
+- ✅ **Procesamiento temporal** para datos externos
+- ✅ **Sin persistencia** de datos externos
 
 ## 🧪 Testing
 
+### **Tests de Accesibilidad**
 ```bash
-# Ejecutar todos los tests
-pytest
-
-# Con cobertura
-pytest --cov=app --cov-report=html
-
-# Tests específicos
-pytest tests/test_factura_api.py
-pytest tests/test_modelos.py
-
-# Verificar calidad del código
-flake8 app/ tests/
-black --check app/ tests/
-bandit -r app/
+cd frontend
+npm run test:accessibility
 ```
 
-## 🔧 Configuración
-
-El proyecto soporta múltiples entornos de configuración:
-
-### Variables de Entorno
+### **Tests de API**
 ```bash
-# Flask
-FLASK_ENV=development|production|testing
-FLASK_APP=run.py
-FLASK_DEBUG=true|false
-
-# Base de Datos
-DATABASE_URL=sqlite:///instance/eFactura.db
-POSTGRES_URL=postgresql://user:pass@localhost/efactura
-
-# Servidor
-HOST=0.0.0.0
-PORT=5000
-
-# Seguridad
-SECRET_KEY=your-secret-key
-MAX_CONTENT_LENGTH=16777216
-
-# Facturación
-IVA_PORCENTAJE=0.21
-BASE_URL_VERIFICACION=http://localhost:5000/verificar/
+python -m pytest tests/
 ```
 
-### Configuraciones por Entorno
-- **Development**: Configuración para desarrollo local con SQLite
-- **Production**: Configuración para producción con PostgreSQL
-- **Testing**: Configuración para tests con base de datos en memoria
-
-## 🏗️ Arquitectura
-
-### Principios de Diseño
-
-1. **Separación de Responsabilidades**: Cada módulo tiene una responsabilidad específica
-2. **Inyección de Dependencias**: Configuración centralizada y modular
-3. **Manejo de Errores**: Excepciones personalizadas y manejo consistente
-4. **Validación**: Validación robusta de datos de entrada
-5. **Código Limpio**: Estructura clara y mantenible
-
-### Capas de la Aplicación
-
-- **Routes**: Manejo de requests HTTP y respuestas
-- **Services**: Lógica de negocio y servicios externos
-- **Models**: Modelos de dominio y entidades
-- **Utils**: Utilidades y helpers reutilizables
-- **Storage**: Persistencia de datos y mapeo objeto-relacional
-
-### Patrones Utilizados
-
-- **Factory Pattern**: Creación de aplicación Flask
-- **Repository Pattern**: Acceso a datos a través de Storage
-- **Strategy Pattern**: Diferentes configuraciones por entorno
-- **Exception Handling**: Manejo centralizado de errores
-
-## 🚀 Despliegue
-
-### Desarrollo Local
+### **Ejemplo de Aplicación Externa**
 ```bash
-python run.py
+python ejemplo_aplicacion_externa.py
 ```
 
-### Producción con Gunicorn
-```bash
-export FLASK_ENV=production
-gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 run:app
-```
+## 📚 Documentación
 
-### Docker (Recomendado)
-```dockerfile
-FROM python:3.11-slim
+- **[API Externa](API_EXTERNA_README.md)** - Documentación para aplicaciones externas
+- **[Swagger](swagger.yaml)** - Documentación OpenAPI completa
+- **[Accesibilidad](frontend/ACCESSIBILITY_REPORT.md)** - Reporte de accesibilidad
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-EXPOSE 5000
-
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "run:app"]
-```
-
-### CI/CD Pipeline
-El proyecto incluye GitHub Actions para:
-- Tests automáticos en múltiples versiones de Python
-- Verificación de calidad de código (flake8, black, bandit)
-- Análisis de seguridad de dependencias
-- Despliegue automático
-
-## 📝 Mejoras Implementadas
-
-### Antes vs Después
-
-**Antes:**
-- ❌ Código duplicado en múltiples archivos
-- ❌ Configuración hardcodeada
-- ❌ Manejo de errores inconsistente
-- ❌ Validación básica
-- ❌ Archivos muy largos y complejos
-- ❌ Falta de documentación técnica
-
-**Después:**
-- ✅ Configuración centralizada (`app/config.py`)
-- ✅ Utilidades reutilizables (`app/utils/`)
-- ✅ Excepciones personalizadas (`app/exceptions.py`)
-- ✅ Validación robusta (`app/utils/validators.py`)
-- ✅ Separación de responsabilidades
-- ✅ Código más limpio y mantenible
-- ✅ Manejo de errores consistente
-- ✅ Documentación UML completa
-- ✅ CI/CD pipeline automatizado
-- ✅ Tests con cobertura
-
-## 🔍 Monitoreo y Logs
-
-### Logs de Aplicación
-```python
-import logging
-logging.info("Factura creada exitosamente")
-logging.error("Error al procesar PDF")
-```
-
-### Métricas Recomendadas
-- Número de facturas creadas por día
-- Tiempo de respuesta de la API
-- Tasa de errores por endpoint
-- Uso de almacenamiento
-
-## 🤝 Contribución
+## 🤝 Contribuir
 
 1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Ejecuta los tests: `pytest`
-4. Verifica la calidad: `flake8 app/ && black --check app/`
-5. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-6. Push a la rama (`git push origin feature/AmazingFeature`)
-7. Abre un Pull Request
-
-### Guías de Contribución
-- Sigue las convenciones de código existentes
-- Agrega tests para nuevas funcionalidades
-- Actualiza la documentación según sea necesario
-- Verifica que todos los tests pasen antes del PR
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
 
 ## 📄 Licencia
 
@@ -366,11 +276,17 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 📞 Soporte
 
-Para soporte técnico o preguntas:
-- Abre un issue en GitHub
-- Revisa la documentación en `diagramas/README.md`
-- Consulta los diagramas UML para entender la arquitectura
+- **Issues:** [GitHub Issues](https://github.com/tu-usuario/efactura/issues)
+- **Documentación:** [Wiki](https://github.com/tu-usuario/efactura/wiki)
+- **Email:** support@efactura.com
+
+## 🎉 Agradecimientos
+
+- Flask por el framework web
+- React por la interfaz de usuario
+- Playwright por los tests de accesibilidad
+- SQLAlchemy por el ORM
 
 ---
 
-*Desarrollado con ❤️ usando Flask, SQLAlchemy y PlantUML* 
+**Desarrollado con ❤️ por el equipo de eFactura** 

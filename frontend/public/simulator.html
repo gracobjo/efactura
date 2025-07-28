@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Aplicación Externa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .connection-status {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .connect-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 200px;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+
+        .connect-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .api-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .api-info h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .api-info p {
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .response-area {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .response-area h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .response-area pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        .loading {
+            display: none;
+            margin: 10px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #2e7d32;
+            background: #e8f5e8;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📊</div>
+        <h1>Sistema de Gestión Empresarial</h1>
+        <p class="subtitle">Conectando con eFactura API</p>
+
+        <div class="connection-status">
+            <span class="status-indicator"></span>
+            <strong>Estado:</strong> Conectado a eFactura API
+        </div>
+
+        <div class="button-group">
+            <button class="connect-btn" onclick="testConnection()">
+                🔗 Probar Conexión API
+            </button>
+
+            <button class="connect-btn" onclick="createInvoice()">
+                📄 Crear Factura (Guardar en BD)
+            </button>
+
+            <button class="connect-btn" onclick="getInvoices()">
+                📋 Obtener Facturas
+            </button>
+        </div>
+
+        <div class="button-group">
+            <button class="connect-btn" onclick="procesarFacturaExterna()">
+                🔄 Procesar Factura Externa
+            </button>
+
+            <button class="connect-btn" onclick="validarFactura()">
+                ✅ Validar Factura
+            </button>
+
+            <button class="connect-btn" onclick="calcularTotal()">
+                🧮 Calcular Total
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Conectando con eFactura...</p>
+        </div>
+
+        <div class="api-info">
+            <h3>🔧 Información de la API</h3>
+            <p><strong>URL Base:</strong> http://localhost:5000</p>
+            <p><strong>Endpoints:</strong></p>
+            <p>• /api/facturas (GET/POST) - CRUD de facturas</p>
+            <p>• /api/procesar-factura (POST) - Procesar sin guardar</p>
+            <p>• /api/validar-factura (POST) - Validar datos</p>
+            <p>• /api/calcular-total (POST) - Calcular totales</p>
+            <p><strong>Formato:</strong> JSON</p>
+        </div>
+
+        <div class="response-area" id="response-area">
+            <h4>📤 Respuestas de la API</h4>
+            <pre id="response-content">Haz clic en un botón para ver las respuestas...</pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showResponse(title, data, isError = false) {
+            const responseContent = document.getElementById('response-content');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let content = `[${timestamp}] ${title}\n`;
+            content += '─'.repeat(50) + '\n';
+            
+            if (isError) {
+                content += `❌ Error: ${data}\n`;
+            } else {
+                content += `✅ Respuesta:\n${JSON.stringify(data, null, 2)}\n`;
+            }
+            
+            content += '\n' + responseContent.textContent;
+            responseContent.textContent = content;
+        }
+
+        async function testConnection() {
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/facturas`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResponse('✅ Conexión Exitosa', data);
+                } else {
+                    showResponse('❌ Error de Conexión', `HTTP ${response.status}: ${response.statusText}`, true);
+                }
+            } catch (error) {
+                showResponse('❌ Error de Red', error.message, true);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function createInvoice() {
+            showLoading();
+            
+            const testInvoice = {
+                cliente: {
+                    nombre: "Empresa Simulada S.L.",
+                    direccion: "Calle Simulación 123, 28001 Madrid",
+                    identificacion: "B12345678"
+                },
+                items: [
+                    {
+                        descripcion: "Servicio de Simulación",
+                        cantidad: 1,
+                        precio: 100.00
+                    }
+                ],
+                fecha: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/facturas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testInvoice)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResponse('✅ Factura Creada (Guardada en BD)', data);
+                } else {
+                    const errorText = await response.text();
+                    showResponse('❌ Error al Crear Factura', `HTTP ${response.status}: ${errorText}`, true);
+                }
+            } catch (error) {
+                showResponse('❌ Error de Red', error.message, true);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function getInvoices() {
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/facturas`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResponse('✅ Facturas Obtenidas', data);
+                } else {
+                    const errorText = await response.text();
+                    showResponse('❌ Error al Obtener Facturas', `HTTP ${response.status}: ${errorText}`, true);
+                }
+            } catch (error) {
+                showResponse('❌ Error de Red', error.message, true);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function procesarFacturaExterna() {
+            showLoading();
+            
+            // Datos de una aplicación externa (no se guardan en BD)
+            const facturaExterna = {
+                cliente: {
+                    nombre: "Cliente Externo S.A.",
+                    direccion: "Av. Externa 456, 08001 Barcelona",
+                    identificacion: "A87654321"
+                },
+                items: [
+                    {
+                        descripcion: "Consultoría IT",
+                        cantidad: 10,
+                        precio: 150.00
+                    },
+                    {
+                        descripcion: "Desarrollo Web",
+                        cantidad: 1,
+                        precio: 2500.00
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/procesar-factura`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(facturaExterna)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResponse('✅ Factura Externa Procesada (NO guardada en BD)', data);
+                } else {
+                    const errorText = await response.text();
+                    showResponse('❌ Error al Procesar Factura', `HTTP ${response.status}: ${errorText}`, true);
+                }
+            } catch (error) {
+                showResponse('❌ Error de Red', error.message, true);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function validarFactura() {
+            showLoading();
+            
+            const facturaParaValidar = {
+                cliente: {
+                    nombre: "Cliente de Prueba",
+                    direccion: "Calle Test 789",
+                    identificacion: "C98765432"
+                },
+                items: [
+                    {
+                        descripcion: "Producto A",
+                        cantidad: 5,
+                        precio: 25.50
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/validar-factura`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(facturaParaValidar)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResponse('✅ Factura Validada', data);
+                } else {
+                    const errorText = await response.text();
+                    showResponse('❌ Error al Validar Factura', `HTTP ${response.status}: ${errorText}`, true);
+                }
+            } catch (error) {
+                showResponse('❌ Error de Red', error.message, true);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function calcularTotal() {
+            showLoading();
+            
+            const itemsParaCalcular = [
+                {
+                    descripcion: "Servicio 1",
+                    cantidad: 3,
+                    precio: 100.00
+                },
+                {
+                    descripcion: "Servicio 2",
+                    cantidad: 2,
+                    precio: 75.50
+                }
+            ];
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/calcular-total`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ items: itemsParaCalcular })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResponse('✅ Total Calculado', data);
+                } else {
+                    const errorText = await response.text();
+                    showResponse('❌ Error al Calcular Total', `HTTP ${response.status}: ${errorText}`, true);
+                }
+            } catch (error) {
+                showResponse('❌ Error de Red', error.message, true);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Auto-test al cargar la página
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testConnection();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,151 +1,43 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: eFactura API
-  version: 1.2.0
-  description: API REST para facturación electrónica con búsqueda avanzada.
+  description: |
+    API REST para el sistema de facturación electrónica eFactura.
+    
+    ## Funcionalidades Principales
+    - Gestión completa de facturas (CRUD)
+    - Procesamiento de facturas externas sin persistencia
+    - Validación de datos de facturas
+    - Cálculo de totales para presupuestos
+    - Integración con aplicaciones externas (Contasimple, Sage, etc.)
+    
+    ## Seguridad
+    - CORS habilitado para desarrollo
+    - Validación de datos en todos los endpoints
+    - Procesamiento temporal para datos externos
+    
+  version: 1.0.0
+  contact:
+    name: eFactura Team
+    email: support@efactura.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
 servers:
   - url: http://localhost:5000
+    description: Servidor de desarrollo
+  - url: https://api.efactura.com
+    description: Servidor de producción
+
 paths:
-  /factura:
-    post:
-      summary: Crear una nueva factura y devolver el PDF generado
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                cliente:
-                  type: object
-                  properties:
-                    nombre:
-                      type: string
-                    direccion:
-                      type: string
-                    identificacion:
-                      type: string
-                  required: [nombre, direccion, identificacion]
-                items:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      descripcion:
-                        type: string
-                      cantidad:
-                        type: integer
-                      precio_unitario:
-                        type: number
-                    required: [descripcion, cantidad, precio_unitario]
-              required: [cliente, items]
-      responses:
-        '200':
-          description: PDF generado
-          content:
-            application/pdf:
-              schema:
-                type: string
-                format: binary
-        '400':
-          description: Datos inválidos
-
-  /facturas:
+  /:
     get:
-      summary: Buscar y listar facturas con filtros avanzados
-      parameters:
-        - in: query
-          name: cliente_nombre
-          schema:
-            type: string
-          description: Nombre del cliente (búsqueda parcial)
-        - in: query
-          name: cliente_identificacion
-          schema:
-            type: string
-          description: Identificación del cliente
-        - in: query
-          name: fecha_desde
-          schema:
-            type: string
-            format: date
-          description: Fecha de inicio (YYYY-MM-DD)
-        - in: query
-          name: fecha_hasta
-          schema:
-            type: string
-            format: date
-          description: Fecha de fin (YYYY-MM-DD)
-        - in: query
-          name: total_min
-          schema:
-            type: number
-          description: Total mínimo de la factura
-        - in: query
-          name: total_max
-          schema:
-            type: number
-          description: Total máximo de la factura
+      summary: Información del API
+      description: Endpoint principal que proporciona información sobre el API
       responses:
         '200':
-          description: Lista de facturas filtradas
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    numero:
-                      type: string
-                    fecha:
-                      type: string
-                    cliente:
-                      type: object
-                      properties:
-                        nombre:
-                          type: string
-                        identificacion:
-                          type: string
-                    total:
-                      type: number
-
-  /factura/{id_factura}/pdf:
-    get:
-      summary: Descargar el PDF de una factura por su ID
-      parameters:
-        - in: path
-          name: id_factura
-          schema:
-            type: integer
-          required: true
-          description: ID de la factura
-      responses:
-        '200':
-          description: PDF de la factura
-          content:
-            application/pdf:
-              schema:
-                type: string
-                format: binary
-        '404':
-          description: Factura no encontrada
-
-  /factura/{id_factura}:
-    delete:
-      summary: Eliminar una factura por su ID
-      parameters:
-        - in: path
-          name: id_factura
-          schema:
-            type: integer
-          required: true
-          description: ID de la factura
-      responses:
-        '200':
-          description: Factura eliminada correctamente
+          description: Información del API
           content:
             application/json:
               schema:
@@ -153,39 +45,440 @@ paths:
                 properties:
                   message:
                     type: string
-        '404':
-          description: Factura no encontrada
+                    example: "eFactura API - Sistema de Facturación Electrónica"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  status:
+                    type: string
+                    example: "running"
+                  endpoints:
+                    type: object
+                    properties:
+                      health:
+                        type: string
+                        example: "/health"
+                      facturas:
+                        type: string
+                        example: "/api/facturas"
+                      procesar:
+                        type: string
+                        example: "/api/procesar-factura"
+                      validar:
+                        type: string
+                        example: "/api/validar-factura"
+                      calcular:
+                        type: string
+                        example: "/api/calcular-total"
 
-  /verificar/{id_factura}:
+  /health:
     get:
-      summary: Verificar una factura por su ID
-      parameters:
-        - in: path
-          name: id_factura
-          schema:
-            type: integer
-          required: true
-          description: ID de la factura
+      summary: Estado de salud del API
+      description: Verifica el estado de funcionamiento del servidor
       responses:
         '200':
-          description: Datos básicos de la factura
+          description: Servidor funcionando correctamente
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  service:
+                    type: string
+                    example: "eFactura API"
+                  timestamp:
+                    type: string
+                    example: "2024-01-01T00:00:00Z"
+
+  /api/facturas:
+    get:
+      summary: Obtener todas las facturas
+      description: Lista todas las facturas almacenadas en la base de datos
+      responses:
+        '200':
+          description: Lista de facturas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Facturas obtenidas exitosamente"
+                  count:
+                    type: integer
+                    example: 15
+                  facturas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FacturaResumen'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Crear nueva factura
+      description: Crea una nueva factura y la guarda en la base de datos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FacturaInput'
+      responses:
+        '201':
+          description: Factura creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Factura creada exitosamente"
+                  id:
+                    type: integer
+                    example: 1
                   numero:
                     type: string
-                  fecha:
-                    type: string
+                    example: "FAC-20250728-ABC123"
                   cliente:
-                    type: object
-                    properties:
-                      nombre:
-                        type: string
-                      identificacion:
-                        type: string
+                    type: string
+                    example: "Empresa S.L."
                   total:
                     type: number
-        '404':
-          description: Factura no encontrada 
+                    format: float
+                    example: 1500.00
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/procesar-factura:
+    post:
+      summary: Procesar factura externa
+      description: |
+        Procesa una factura completa sin guardarla en la base de datos.
+        Ideal para aplicaciones externas que quieren usar las funcionalidades
+        de eFactura sin afectar la BD del sistema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FacturaInput'
+      responses:
+        '200':
+          description: Factura procesada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Factura procesada exitosamente"
+                  numero:
+                    type: string
+                    example: "FAC-20250728-ABC123"
+                  cliente:
+                    $ref: '#/components/schemas/Cliente'
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ItemProcesado'
+                  total:
+                    type: number
+                    format: float
+                    example: 1500.00
+                  fecha:
+                    type: string
+                    format: date
+                    example: "2025-07-28"
+                  procesado_en:
+                    type: string
+                    example: "eFactura API"
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/validar-factura:
+    post:
+      summary: Validar factura
+      description: |
+        Valida los datos de una factura sin procesarla completamente.
+        Útil para verificar la integridad de los datos antes de procesarlos.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FacturaInput'
+      responses:
+        '200':
+          description: Factura válida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Factura válida"
+                  cliente_valido:
+                    type: boolean
+                    example: true
+                  items_validos:
+                    type: integer
+                    example: 2
+                  total_items:
+                    type: integer
+                    example: 2
+                  errores:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+        '400':
+          description: Factura inválida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Factura inválida"
+                  cliente_valido:
+                    type: boolean
+                    example: false
+                  items_validos:
+                    type: integer
+                    example: 0
+                  total_items:
+                    type: integer
+                    example: 2
+                  errores:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Formato de identificación inválido"]
+
+  /api/calcular-total:
+    post:
+      summary: Calcular total de items
+      description: |
+        Calcula el total de una lista de items sin procesar una factura completa.
+        Útil para presupuestos y cálculos rápidos.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ItemInput'
+              required:
+                - items
+      responses:
+        '200':
+          description: Total calculado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Total calculado exitosamente"
+                  subtotales:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ItemSubtotal'
+                  total:
+                    type: number
+                    format: float
+                    example: 127.50
+                  cantidad_items:
+                    type: integer
+                    example: 1
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Cliente:
+      type: object
+      properties:
+        nombre:
+          type: string
+          description: Nombre completo del cliente
+          example: "Empresa S.L."
+        direccion:
+          type: string
+          description: Dirección completa del cliente
+          example: "Calle Principal 123, 28001 Madrid"
+        identificacion:
+          type: string
+          description: Número de identificación fiscal (CIF/NIF)
+          example: "B12345678"
+      required:
+        - nombre
+        - direccion
+        - identificacion
+
+    ItemInput:
+      type: object
+      properties:
+        descripcion:
+          type: string
+          description: Descripción del producto o servicio
+          example: "Servicio de Consultoría"
+        cantidad:
+          type: integer
+          minimum: 1
+          description: Cantidad del item
+          example: 10
+        precio:
+          type: number
+          format: float
+          minimum: 0
+          description: Precio unitario
+          example: 150.00
+      required:
+        - descripcion
+        - cantidad
+        - precio
+
+    ItemProcesado:
+      type: object
+      properties:
+        descripcion:
+          type: string
+          example: "Servicio de Consultoría"
+        cantidad:
+          type: integer
+          example: 10
+        precio_unitario:
+          type: number
+          format: float
+          example: 150.00
+        subtotal:
+          type: number
+          format: float
+          example: 1500.00
+
+    ItemSubtotal:
+      type: object
+      properties:
+        descripcion:
+          type: string
+          example: "Producto A"
+        cantidad:
+          type: integer
+          example: 5
+        precio:
+          type: number
+          format: float
+          example: 25.50
+        subtotal:
+          type: number
+          format: float
+          example: 127.50
+
+    FacturaInput:
+      type: object
+      properties:
+        cliente:
+          $ref: '#/components/schemas/Cliente'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemInput'
+          minItems: 1
+        fecha:
+          type: string
+          format: date
+          description: Fecha de la factura (opcional, por defecto fecha actual)
+          example: "2025-07-28"
+      required:
+        - cliente
+        - items
+
+    FacturaResumen:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Número de factura
+          example: "FAC-20250728-ABC123"
+        cliente:
+          type: string
+          description: Nombre del cliente
+          example: "Empresa S.L."
+        fecha:
+          type: string
+          format: date
+          description: Fecha de la factura
+          example: "2025-07-28"
+        total:
+          type: number
+          format: float
+          description: Total de la factura
+          example: 1500.00
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensaje de error descriptivo
+          example: "Error al procesar la factura"
+      required:
+        - message
+
+tags:
+  - name: Core
+    description: Endpoints principales del sistema
+  - name: External
+    description: Endpoints para aplicaciones externas
+  - name: Validation
+    description: Endpoints de validación de datos
+  - name: Calculation
+    description: Endpoints de cálculo y procesamiento 

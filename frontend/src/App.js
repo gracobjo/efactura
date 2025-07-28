@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FacturaForm from './components/FacturaForm';
 import FacturaVerificar from './components/FacturaVerificar';
 import FacturaMigrar from './components/FacturaMigrar';
@@ -7,6 +7,14 @@ import './App.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('crear');
+
+  // Establecer el foco en el primer tab cuando se carga la página
+  useEffect(() => {
+    const firstTab = document.getElementById('tab-crear');
+    if (firstTab) {
+      firstTab.focus();
+    }
+  }, []);
 
   const handleKeyDown = (e) => {
     const tabs = ['crear', 'verificar', 'migrar'];
@@ -17,21 +25,39 @@ function App() {
         e.preventDefault();
         const nextIndex = (currentIndex + 1) % tabs.length;
         setActiveTab(tabs[nextIndex]);
+        // Establecer foco en el nuevo tab
+        setTimeout(() => {
+          const newTab = document.getElementById(`tab-${tabs[nextIndex]}`);
+          if (newTab) newTab.focus();
+        }, 0);
         break;
       }
       case 'ArrowLeft': {
         e.preventDefault();
         const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
         setActiveTab(tabs[prevIndex]);
+        // Establecer foco en el nuevo tab
+        setTimeout(() => {
+          const newTab = document.getElementById(`tab-${tabs[prevIndex]}`);
+          if (newTab) newTab.focus();
+        }, 0);
         break;
       }
       case 'Home':
         e.preventDefault();
         setActiveTab(tabs[0]);
+        setTimeout(() => {
+          const firstTab = document.getElementById('tab-crear');
+          if (firstTab) firstTab.focus();
+        }, 0);
         break;
       case 'End':
         e.preventDefault();
         setActiveTab(tabs[tabs.length - 1]);
+        setTimeout(() => {
+          const lastTab = document.getElementById('tab-migrar');
+          if (lastTab) lastTab.focus();
+        }, 0);
         break;
       default:
         break;
