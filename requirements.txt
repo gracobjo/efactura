@@ -6,7 +6,7 @@ PyPDF2==3.0.1
 fpdf==1.7.2
 qrcode==7.4.2
 Pillow==11.3.0
-pandas==2.3.1
+pandas==2.3.2
 matplotlib==3.10.3
 numpy==2.3.1
 pytest==8.2.2
