@@ -59,7 +59,7 @@ jobs:
           node scripts/generate-accessibility-report.js
           
       - name: 📤 Subir reporte como artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: accessibility-report
           path: |
